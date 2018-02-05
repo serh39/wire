@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
+#include <optional>
 #include "libwire/internal/endianess.hpp"
 #include "libwire/error.hpp"
 
@@ -18,6 +19,24 @@ namespace libwire::internal_ {
             return {memory_view(&sock_address_v6.sin6_addr, sizeof(sock_address_v6.sin6_addr)),
                     network_to_host(sock_address_v6.sin6_port)};
         }
+        assert(false);
+    }
+
+    static sockaddr endpoint_to_sockaddr(std::tuple<address, uint16_t> in) {
+        sockaddr addr{};
+        if (std::get<0>(in).version == ip::v4) {
+            auto& addr_v4 = reinterpret_cast<sockaddr_in&>(addr);
+            addr_v4.sin_family = AF_INET;
+            addr_v4.sin_addr.s_addr = *reinterpret_cast<uint32_t*>(std::get<0>(in).parts.data());
+            addr_v4.sin_port = host_to_network(std::get<1>(in));
+        }
+        if (std::get<0>(in).version == ip::v6) {
+            auto addr_v6 = reinterpret_cast<sockaddr_in6&>(addr);
+            addr_v6.sin6_family = AF_INET6;
+            addr_v6.sin6_addr = *reinterpret_cast<in6_addr*>(std::get<0>(in).parts.data());
+            addr_v6.sin6_port = host_to_network(std::get<1>(in));
+        }
+        return addr;
         assert(false);
     }
 
@@ -94,12 +113,9 @@ namespace libwire::internal_ {
     void socket::connect(address target, uint16_t port, std::error_code& ec) noexcept {
         assert(fd != not_initialized);
 
-        struct sockaddr_in address {};
-        address.sin_family = AF_INET;
-        address.sin_port = host_to_network(port);
-        address.sin_addr = *reinterpret_cast<in_addr*>(target.parts.data());
+        struct sockaddr address = endpoint_to_sockaddr({target, port});
 
-        int status = ::connect(fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+        int status = ::connect(fd, &address, sizeof(address));
         if (status < 0) {
             if (errno == EINTR) {
                 connect(target, port, ec);
@@ -158,7 +174,7 @@ namespace libwire::internal_ {
             return socket();
         }
 
-        return socket(accepted_fd);
+        return socket(accepted_fd, this->ip_version, this->transport_protocol);
     }
 
 #ifdef MSG_NOSIGNAL
@@ -228,5 +244,42 @@ namespace libwire::internal_ {
         if (status < 0) return {{0, 0, 0, 0}, 0u};
 #endif
         return sockaddr_to_endpoint(sock_address);
+    }
+
+    void socket::send_to(const void* input, size_t length_bytes, std::error_code& ec,
+                         std::optional<std::tuple<address, uint16_t>> destination) noexcept {
+        assert(fd != not_initialized);
+
+        ssize_t actually_written;
+        if (destination) {
+            sockaddr addr = endpoint_to_sockaddr(*destination);
+            actually_written = sendto(fd, input, length_bytes, IO_FLAGS,
+                                      &addr, sizeof(sockaddr));
+        } else {
+            actually_written = sendto(fd, input, length_bytes, IO_FLAGS,
+                                      nullptr, 0);
+        }
+
+        if (actually_written < 0) {
+            ec = std::error_code(errno, error::system_category());
+            assert(ec != error::unexpected);
+        }
+    }
+
+    std::tuple<address, uint16_t, size_t> socket::receive_from(void* output, size_t length_bytes, std::error_code& ec) noexcept {
+        assert(fd != not_initialized);
+
+        sockaddr sockaddr;
+        socklen_t socklen = sizeof(sockaddr);
+
+        ssize_t received_bytes = recvfrom(fd, output, length_bytes, IO_FLAGS, &sockaddr, &socklen);
+        if (received_bytes < 0) {
+            ec = std::error_code(errno, error::system_category());
+            assert(ec != error::unexpected);
+            return {{0, 0, 0, 0}, 0, 0};
+        }
+
+        std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sockaddr);
+        return {std::get<0>(endpoint), std::get<1>(endpoint), received_bytes};
     }
 } // namespace libwire::internal_

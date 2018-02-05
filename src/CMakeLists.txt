@@ -6,6 +6,7 @@ set(LIBWIRE_SOURCES
     internal/endianess.cpp
     tcp/socket.cpp
     tcp/listener.cpp
+    udp/socket.cpp
     error.cpp
     memory_view.cpp
     )
@@ -27,6 +28,7 @@ set(LIBWIRE_HEADERS
     ../include/libwire/tcp/socket.hpp
     ../include/libwire/tcp/options.hpp
     ../include/libwire/tcp/listener.hpp
+    ../include/libwire/udp/socket.hpp
     ../include/libwire/error.hpp
     ../include/libwire/memory_view.hpp
     ../include/libwire/protocols.hpp

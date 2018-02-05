@@ -27,6 +27,7 @@
 #include <system_error>
 #include <libwire/address.hpp>
 #include <libwire/protocols.hpp>
+#include <optional>
 
 namespace libwire::internal_ {
     /**
@@ -63,7 +64,8 @@ namespace libwire::internal_ {
          */
         socket() noexcept = default;
 
-        explicit socket(int fd) : fd(fd) {
+        explicit socket(int fd, ip ip_version, transport transport_protocol)
+            : ip_version(ip_version), transport_protocol(transport_protocol), fd(fd) {
         }
 
         /**
@@ -130,6 +132,19 @@ namespace libwire::internal_ {
         size_t read(void* output, size_t length_bytes, std::error_code& ec) noexcept;
 
         /**
+         * Send length_bytes from input to destination, set ec if any error
+         * occurred.
+         */
+        void send_to(const void* input, size_t length_bytes, std::error_code& ec,
+                     std::optional<std::tuple<address, uint16_t>> destination) noexcept;
+
+        /**
+         * Read length_bytes from socket datagram queue to output, set ec if
+         * any occurred, return source endpoint and actual size of datagram.
+         */
+        std::tuple<address, uint16_t, size_t> receive_from(void* output, size_t length_bytes, std::error_code& ec) noexcept;
+
+        /**
          * Allows to check whether socket is initialized and can be operated on.
          */
         operator bool() const noexcept;
@@ -138,6 +153,8 @@ namespace libwire::internal_ {
 
         std::tuple<address, uint16_t> remote_endpoint() const noexcept;
 
+        const ip ip_version = ip(0);
+        const transport transport_protocol = transport(0);
     private:
         int fd = not_initialized;
     };
