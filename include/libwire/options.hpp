@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <libwire/tcp/socket.hpp>
 
 namespace libwire {
@@ -56,4 +57,60 @@ namespace libwire {
      * space left in buffer.
      */
     constexpr non_blocking_t non_blocking{};
+
+    struct receive_timeout_t {
+        template<typename Socket, typename Duration>
+        static void set(Socket& socket, Duration d) noexcept {
+            namespace ch = std::chrono;
+
+            set_impl(socket.native_handle(), ch::duration_cast<ch::milliseconds>(d));
+        }
+
+        template<typename Socket>
+        static std::chrono::milliseconds get(const Socket& socket) noexcept {
+            return get_impl(socket.native_handle());
+        }
+
+    private:
+        static std::chrono::milliseconds get_impl(internal_::socket::native_handle_t) noexcept;
+        static void set_impl(internal_::socket::native_handle_t, std::chrono::milliseconds) noexcept;
+    };
+
+    /**
+     * Specify timeout for blocking read operations.
+     *
+     * Doesn't affects asynchronous and non-blocking operations.
+     *
+     * \warning Socket may be left in inconsistent state after timeout, it's
+     * unsafe to use it and your only choice is close().
+     */
+    constexpr receive_timeout_t receive_timeout{};
+
+    struct send_timeout_t {
+        template<typename Socket, typename Duration>
+        static void set(Socket& socket, Duration d) noexcept {
+            namespace ch = std::chrono;
+
+            set_impl(socket.native_handle(), ch::duration_cast<ch::milliseconds>(d));
+        }
+
+        template<typename Socket>
+        static std::chrono::milliseconds get(const Socket& socket) noexcept {
+            return get_impl(socket.native_handle());
+        }
+
+    private:
+        static std::chrono::milliseconds get_impl(internal_::socket::native_handle_t) noexcept;
+        static void set_impl(internal_::socket::native_handle_t, std::chrono::milliseconds) noexcept;
+    };
+
+    /**
+     * Specify timeout for blocking write operations.
+     *
+     * Doesn't affects asynchronous and non-blocking operations.
+     *
+     * \warning Socket may be left in inconsistent state after timeout, it's
+     * unsafe to use it and your only choice is close().
+     */
+    constexpr send_timeout_t send_timeout{};
 } // namespace libwire

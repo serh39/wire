@@ -22,7 +22,9 @@
 
 #include "libwire/options.hpp"
 
+#include <cassert>
 #include <fcntl.h>
+#include <sys/socket.h>
 
 namespace libwire {
     bool non_blocking_t::get_impl(internal_::socket::native_handle_t fd) noexcept {
@@ -34,5 +36,37 @@ namespace libwire {
         int flags = fcntl(fd, F_GETFL, 0);
         flags = enable ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK);
         fcntl(fd, F_SETFL, flags);
+    }
+
+    std::chrono::milliseconds receive_timeout_t::get_impl(internal_::socket::native_handle_t fd) noexcept {
+        timeval timeval{};
+        socklen_t size = sizeof(timeval);
+        getsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                   &timeval, &size);
+        assert(size == sizeof(timeval));
+        return std::chrono::milliseconds((timeval.tv_sec * 1000) + (timeval.tv_usec / 1000));
+    }
+
+    std::chrono::milliseconds send_timeout_t::get_impl(internal_::socket::native_handle_t fd) noexcept {
+        timeval timeval{};
+        socklen_t size = sizeof(timeval);
+        getsockopt(fd, SOL_SOCKET, SO_SNDTIMEO,
+                   &timeval, &size);
+        assert(size == sizeof(timeval));
+        return std::chrono::milliseconds((timeval.tv_sec * 1000) + (timeval.tv_usec / 1000));
+    }
+
+    void send_timeout_t::set_impl(internal_::socket::native_handle_t fd, std::chrono::milliseconds ms) noexcept {
+        timeval timeval{};
+        timeval.tv_usec = ms.count() * 1000;
+        setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO,
+                   &timeval, sizeof(timeval));
+    }
+
+    void receive_timeout_t::set_impl(internal_::socket::native_handle_t fd, std::chrono::milliseconds ms) noexcept {
+        timeval timeval{};
+        timeval.tv_usec = ms.count() * 1000;
+        setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                   &timeval, sizeof(timeval));
     }
 } // namespace libwire
