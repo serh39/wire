@@ -10,7 +10,7 @@ branches:
 matrix:
   include:
   # Build & test using clang with sanitizers.
-  - env: BUILD_TYPE=Debug LD_LIBRARY_PATH=/usr/local/clang-5.0.0/lib CXXFLAGS="-stdlib=libc++ -fsanitize=address,undefined" TESTS=ON EXAMPLES=ON WSTRICT=ON DOCS=OFF
+  - env: BUILD_TYPE=RelWithDebInfo LD_LIBRARY_PATH=/usr/local/clang-5.0.0/lib CXXFLAGS="-stdlib=libc++ -fsanitize=address,undefined" TESTS=ON EXAMPLES=ON WSTRICT=ON DOCS=OFF
     compiler: clang
   # Generate coverage report.
   - env: BUILD_TYPE=Coverage COMPILER=g++-7 TESTS=ON EXAMPLES=ON WSTRICT=OFF DOCS=OFF
