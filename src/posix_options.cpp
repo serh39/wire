@@ -69,4 +69,32 @@ namespace libwire {
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
                    &timeval, sizeof(timeval));
     }
+
+    size_t send_buffer_size_t::get_impl(internal_::socket::native_handle_t fd) noexcept {
+        size_t result = 0;
+        socklen_t result_size = sizeof(result);
+        getsockopt(fd, SOL_SOCKET, SO_RCVBUF,
+                   &result, &result_size);
+        assert(result_size == sizeof(result));
+        return result;
+    }
+
+    size_t receive_buffer_size_t::get_impl(internal_::socket::native_handle_t fd) noexcept {
+        size_t result = 0;
+        socklen_t result_size = sizeof(result);
+        getsockopt(fd, SOL_SOCKET, SO_SNDBUF,
+                   &result, &result_size);
+        assert(result_size == sizeof(result));
+        return result;
+    }
+
+    void receive_buffer_size_t::set_impl(internal_::socket::native_handle_t fd, size_t size) noexcept {
+        setsockopt(fd, SOL_SOCKET, SO_RCVBUF,
+                   &size, sizeof(size));
+    }
+
+    void send_buffer_size_t::set_impl(internal_::socket::native_handle_t fd, size_t size) noexcept {
+        setsockopt(fd, SOL_SOCKET, SO_SNDBUF,
+                   &size, sizeof(size));
+    }
 } // namespace libwire

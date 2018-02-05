@@ -113,4 +113,40 @@ namespace libwire {
      * unsafe to use it and your only choice is close().
      */
     constexpr send_timeout_t send_timeout{};
+
+    struct send_buffer_size_t {
+        template<typename Socket>
+        static void set(Socket& socket, size_t size) noexcept {
+            set_impl(socket.native_handle(), size);
+        }
+
+        template<typename Socket>
+        static size_t get(const Socket& socket) noexcept {
+            return get_impl(socket.native_handle());
+        }
+
+    private:
+        static size_t get_impl(internal_::socket::native_handle_t) noexcept;
+        static void set_impl(internal_::socket::native_handle_t, size_t) noexcept;
+    };
+
+    constexpr send_buffer_size_t send_buffer_size{};
+
+    struct receive_buffer_size_t {
+        template<typename Socket>
+        static void set(Socket& socket, size_t size) noexcept {
+            set_impl(socket.native_handle(), size);
+        }
+
+        template<typename Socket>
+        static size_t get(const Socket& socket) noexcept {
+            return get_impl(socket.native_handle());
+        }
+
+    private:
+        static size_t get_impl(internal_::socket::native_handle_t) noexcept;
+        static void set_impl(internal_::socket::native_handle_t, size_t) noexcept;
+    };
+
+    constexpr receive_buffer_size_t receive_buffer_size{};
 } // namespace libwire
