@@ -27,12 +27,8 @@
 #include <system_error>
 #include <vector>
 #include <libwire/error.hpp>
+#include <libwire/internal/socket.hpp>
 
-#ifdef __unix__
-#    include <libwire/internal/posix_socket.hpp>
-#else
-#    error "libwire doesn't supports socket interface on your platform. :("
-#endif
 
 /*
  * If you had to open this file to find answer for your question - we are so

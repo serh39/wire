@@ -31,25 +31,12 @@
 
 namespace libwire::internal_ {
     /**
-     * Thin C++ wrapper for POSIX sockets.
-     *
-     * Consult related POSIX Programmer's Manual pages for exact
-     * behavior of each function.
-     * * connect(3P) for socket::connect
-     * * socket(3P) for socket::socket
-     * * write(3P) for socket::write
-     * * read(3P) for socket::read
-     * * listen(3P) for socket::listen
-     * etc...
+     * Thin C++ wrapper for BSD-like sockets.
      */
     struct socket {
+
 #ifdef __unix__
         using native_handle_t = int;
-#else
-        using native_handle_t = void*;
-#endif
-
-        static unsigned max_pending_connections;
 
         /**
          * Constant native_handle() can be compared against to
@@ -58,6 +45,14 @@ namespace libwire::internal_ {
          * \note Prefer to use operator bool() for this check.
          */
         static constexpr native_handle_t not_initialized = -1;
+#else
+        using native_handle_t = void*;
+        static constexpr native_handle_t not_initialized = nullptr;
+
+    #error "Your platform is not supported by libwire. :("
+#endif
+
+        static unsigned max_pending_connections;
 
         /**
          * Construct handle without allocating socket.
@@ -156,6 +151,6 @@ namespace libwire::internal_ {
         const ip ip_version = ip(0);
         const transport transport_protocol = transport(0);
     private:
-        int fd = not_initialized;
+        native_handle_t fd = not_initialized;
     };
 } // namespace libwire::internal_

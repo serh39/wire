@@ -1,4 +1,4 @@
-#include "libwire/internal/posix_socket.hpp"
+#include "libwire/internal/socket.hpp"
 #include <cassert>
 #include <unistd.h>
 #include <sys/socket.h>

@@ -39,7 +39,7 @@ set(LIBWIRE_HEADERS
 set(LIBWIRE_POSIX_HEADERS
     ../include/libwire/internal/error/posix_dns_category.hpp
     ../include/libwire/internal/error/posix_system_category.hpp
-    ../include/libwire/internal/posix_socket.hpp
+    ../include/libwire/internal/socket.hpp
     )
 
 set(LIBWIRE_ALL_SOURCES ${LIBWIRE_SOURCES} ${LIBWIRE_POSIX_SOURCES} PARENT_SCOPE)

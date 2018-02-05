@@ -25,7 +25,7 @@
 #include <vector>
 #include <system_error>
 #include <optional>
-#include <libwire/internal/posix_socket.hpp>
+#include <libwire/internal/socket.hpp>
 
 namespace libwire::udp {
     /**
@@ -39,12 +39,24 @@ namespace libwire::udp {
      * provided by library just allow you to omit destination address in
      * every write call.
      *
-     * \note Frequent switches between IPv4 and IPv6 I/O can create
-     * additional overhead because socket needs to be reallocated.
+     * **Current restrictions**
+     *
+     * Current API doesn't supports IP-version agnostic UDP interface. You have
+     * to specify IP version in constructor or open() call.
      */
     class socket {
     public:
+        /**
+         * Create socket handle and allocate UDP socket with specified
+         * IP version.
+         */
         explicit socket(ip ip_version);
+
+        /**
+         * Create socket handle without associated socket.
+         */
+        socket() = default;
+
         socket(const socket&) = delete;
         socket(socket&&) = default;
 
