@@ -74,10 +74,12 @@ namespace libwire::tcp {
             listen(local_endpoint, port, ec, backlog);
         }
 
+#ifdef __cpp_exceptions
         inline listener(address local_endpoint, uint16_t port,
                         unsigned backlog = internal_::socket::max_pending_connections) {
             listen(local_endpoint, port, backlog);
         }
+#endif
 
         /**
          * Start listening for incoming connections on specified

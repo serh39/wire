@@ -13,6 +13,7 @@ namespace libwire::tcp {
         return {implementation.accept(ec)};
     }
 
+#ifdef __cpp_exceptions
     void listener::listen(address local_address, uint16_t port, unsigned max_backlog) {
         std::error_code ec;
         listen(local_address, port, ec, max_backlog);
@@ -25,4 +26,5 @@ namespace libwire::tcp {
         if (ec) throw std::system_error(ec);
         return sock;
     }
+#endif
 } // namespace libwire::tcp

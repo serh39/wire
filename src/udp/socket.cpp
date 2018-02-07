@@ -38,11 +38,13 @@ namespace libwire::udp {
         implementation.bind(port, source, ec);
     }
 
+#ifdef __cpp_exceptions
     void socket::listen(address source, uint16_t port) {
         std::error_code ec;
         bind(source, port, ec);
         if (ec) throw std::system_error(ec);
     }
+#endif
 
     void socket::associate(address destination, uint16_t port) noexcept {
         std::error_code ec;
@@ -54,11 +56,13 @@ namespace libwire::udp {
         implementation = internal_::socket(ip_version, transport::udp, ec);
     }
 
+#ifdef __cpp_exceptions
     void socket::open(ip ip_version) {
         std::error_code ec;
         open(ip_version, ec);
         if (ec) throw std::system_error(ec);
     }
+#endif
 
     void socket::close() noexcept {
         implementation = internal_::socket();

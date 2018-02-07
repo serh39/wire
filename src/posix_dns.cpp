@@ -59,10 +59,12 @@ namespace libwire::dns {
         return result;
     }
 
+#ifdef __cpp_exceptions
     std::vector<address> resolve(ip protocol, const std::string_view& domain) {
         std::error_code ec;
         auto res = resolve(protocol, domain, ec);
         if (ec) throw std::system_error(ec);
         return res;
     }
+#endif
 } // namespace libwire::dns

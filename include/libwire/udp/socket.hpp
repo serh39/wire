@@ -214,6 +214,7 @@ namespace libwire::udp {
         return {address, port};
     }
 
+#ifdef __cpp_exceptions
     template<typename Buffer>
     std::tuple<address, uint16_t> socket::read(size_t max_size, Buffer& output) {
         std::error_code ec;
@@ -221,6 +222,7 @@ namespace libwire::udp {
         if (ec) throw std::system_error(ec);
         return endpoint;
     }
+#endif
 
     template<typename Buffer>
     std::tuple<Buffer, std::tuple<address, uint16_t>> socket::read(size_t max_size, std::error_code& ec) noexcept {
@@ -228,11 +230,13 @@ namespace libwire::udp {
         return {buffer, read(max_size, buffer, ec)};
     }
 
+#ifdef __cpp_exceptions
     template<typename Buffer>
     std::tuple<Buffer, std::tuple<address, uint16_t>> socket::read(size_t max_size) {
         Buffer buffer;
         return {buffer, read(max_size, buffer)};
     }
+#endif
 
     template<typename Buffer>
     void socket::write(const Buffer& input, std::error_code& ec,
@@ -243,10 +247,12 @@ namespace libwire::udp {
         implementation.send_to(input.data(), input.size(), ec, destination);
     }
 
+#ifdef __cpp_exceptions
     template<typename Buffer>
     void socket::write(const Buffer& input, std::optional<std::tuple<address, uint16_t>> destination) {
         std::error_code ec;
         write(input, ec, destination);
         if (ec) throw std::system_error(ec);
     }
+#endif
 } // namespace libwire::udp

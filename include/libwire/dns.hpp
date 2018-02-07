@@ -52,9 +52,11 @@ namespace libwire::dns {
      */
     std::vector<address> resolve(ip protocol, const std::string_view& domain, std::error_code& ec) noexcept;
 
+#ifdef __cpp_exceptions
     /**
      * Same as overload with error code but throws std::system_error instead of
      * setting error code.
      */
     std::vector<address> resolve(ip protocol, const std::string_view& domain);
+#endif
 } // namespace libwire::dns
