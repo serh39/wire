@@ -20,19 +20,19 @@
  * SOFTWARE.
  */
 
-#include <libwire/internal/error/posix_dns_category.hpp>
+#include <libwire/internal/error/dns_category.hpp>
 
 #include <netdb.h>
 
-const char* libwire::internal_::posix_dns_category::name() const noexcept {
+const char* libwire::internal_::dns_category::name() const noexcept {
     return "dns";
 }
 
-std::string libwire::internal_::posix_dns_category::message(int code) const noexcept {
+std::string libwire::internal_::dns_category::message(int code) const noexcept {
     return gai_strerror(code);
 }
 
-std::error_condition libwire::internal_::posix_dns_category::default_error_condition(int code) const noexcept {
+std::error_condition libwire::internal_::dns_category::default_error_condition(int code) const noexcept {
     if (code == 0) {
         return std::error_condition(error::success, error::system_category());
     }
@@ -61,7 +61,7 @@ std::error_condition libwire::internal_::posix_dns_category::default_error_condi
     return std::error_condition(error::unknown, error::system_category());
 }
 
-bool libwire::internal_::posix_dns_category::equivalent(int code, const std::error_condition& condition) const
+bool libwire::internal_::dns_category::equivalent(int code, const std::error_condition& condition) const
     noexcept {
     if (code == 0) {
         return condition.value() == error::success;

@@ -2,11 +2,7 @@
 #include <cassert>
 #include <algorithm>
 
-#if __has_include(<unistd.h>)
-#    include <unistd.h>
-#endif
-
-#ifdef _POSIX_VERSION
+#if __unix__
 #    include <arpa/inet.h> // inet_pton on POSIX systems
 #endif
 
@@ -30,7 +26,7 @@ namespace libwire {
 #endif
 
     address::address(const std::string_view& text_ip, bool& success) noexcept : version(ip::v4), parts{} {
-#ifdef _POSIX_VERSION
+#ifdef __unix__
         int family = AF_INET;
         for (const char& ch : text_ip) {
             if (ch == ':') {
@@ -47,7 +43,7 @@ namespace libwire {
     }
 
     std::string address::to_string() const noexcept {
-#ifdef _POSIX_VERSION
+#ifdef __unix__
         int family = (version == ip::v4) ? AF_INET : AF_INET6;
 
         std::array<char, 45> buffer;

@@ -27,15 +27,15 @@
 #include <libwire/error.hpp>
 
 /**
- * Mapping of POSIX errno codes to error conditions defined in error.hpp.
+ * Mapping of EAI_* codes to error conditions defined in error.hpp.
  */
 
 namespace libwire::internal_ {
-    class posix_system_category : public std::error_category {
+    class dns_category : public std::error_category {
     public:
-        virtual const char* name() const noexcept override;
-        virtual std::string message(int code) const noexcept override;
-        virtual std::error_condition default_error_condition(int code) const noexcept override;
-        virtual bool equivalent(int code, const std::error_condition& condition) const noexcept override;
+        const char* name() const noexcept override;
+        std::string message(int code) const noexcept override;
+        std::error_condition default_error_condition(int code) const noexcept override;
+        bool equivalent(int code, const std::error_condition& condition) const noexcept override;
     };
 } // namespace libwire::internal_

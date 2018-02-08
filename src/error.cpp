@@ -20,24 +20,21 @@
  * SOFTWARE.
  */
 
+#include <libwire/internal/error/system_category.hpp>
+#include <libwire/internal/error/dns_category.hpp>
 #include "libwire/error.hpp"
-
-#if __has_include(<unistd.h>)
-#    include "libwire/internal/error/posix_system_category.hpp"
-#    include "libwire/internal/error/posix_dns_category.hpp"
-#endif
 
 namespace libwire::error {
     std::error_category& system_category() {
 #if __has_include(<unistd.h>)
-        static internal_::posix_system_category cat;
+        static internal_::system_category cat;
         return cat;
 #endif
     }
 
     std::error_category& dns_category() {
 #if __has_include(<unistd.h>)
-        static internal_::posix_dns_category cat;
+        static internal_::dns_category cat;
         return cat;
 #endif
     }

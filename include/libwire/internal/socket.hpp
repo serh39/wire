@@ -34,7 +34,6 @@ namespace libwire::internal_ {
      * Thin C++ wrapper for BSD-like sockets.
      */
     struct socket {
-
 #ifdef __unix__
         using native_handle_t = int;
 
@@ -59,8 +58,8 @@ namespace libwire::internal_ {
          */
         socket() noexcept = default;
 
-        explicit socket(int fd, ip ip_version, transport transport_protocol)
-            : ip_version(ip_version), transport_protocol(transport_protocol), fd(fd) {
+        explicit socket(native_handle_t handle, ip ip_version, transport transport_protocol)
+            : ip_version(ip_version), transport_protocol(transport_protocol), handle(handle) {
         }
 
         /**
@@ -151,6 +150,6 @@ namespace libwire::internal_ {
         const ip ip_version = ip(0);
         const transport transport_protocol = transport(0);
     private:
-        native_handle_t fd = not_initialized;
+        native_handle_t handle = not_initialized;
     };
 } // namespace libwire::internal_

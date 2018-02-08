@@ -21,10 +21,8 @@
  */
 
 /**
- * Namespace with classes which expose access to system TCP implementation.
+ * Namespace with classes which expose access to system UDP implementation.
  */
-namespace libwire::tcp {} // namespace libwire::tcp
+namespace libwire::udp {} // namespace libwire::udp
 
-#include "tcp/listener.hpp"
-#include "tcp/socket.hpp"
-#include "tcp/options.hpp"
+#include <udp/socket.hpp>
