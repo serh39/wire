@@ -26,17 +26,13 @@
 
 namespace libwire::error {
     std::error_category& system_category() {
-#if __has_include(<unistd.h>)
         static internal_::system_category cat;
         return cat;
-#endif
     }
 
     std::error_category& dns_category() {
-#if __has_include(<unistd.h>)
         static internal_::dns_category cat;
         return cat;
-#endif
     }
 
     std::error_condition make_error_condition(generic val) {

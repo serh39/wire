@@ -6,12 +6,13 @@
 #include "libwire/internal/endianess.hpp"
 #include "libwire/error.hpp"
 
-#ifdef __WIN32
+#ifdef _WIN32
 #   include <ws2tcpip.h>
 #   define SHUT_RD SD_RECEIVE
 #   define SHUT_WR SD_SEND
 #   define SHUT_RDWR SD_BOTH
 #   define close closesocket
+#   define ssize_t int64_t
 #else
 #   include <unistd.h>
 #   include <sys/socket.h>
@@ -20,7 +21,7 @@
 #endif
 
 namespace libwire::internal_ {
-#ifdef __WIN32
+#ifdef _WIN32
     struct Initializer {
         Initializer() {
             WSAData data;
@@ -37,7 +38,7 @@ namespace libwire::internal_ {
     unsigned socket::max_pending_connections = SOMAXCONN;
 
     socket::socket(ip ipver, transport transport, std::error_code& ec) noexcept {
-#ifdef __WIN32
+#ifdef _WIN32
         static Initializer init;
 #endif
 

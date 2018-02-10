@@ -24,7 +24,7 @@
 
 #include <cassert>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #   include <ws2tcpip.h>
 #else
 #   include <sys/socket.h>
@@ -33,17 +33,25 @@
 
 namespace libwire {
     bool non_blocking_t::get_impl(const internal_::socket& socket) noexcept {
-#ifdef __unix__
-        int flags = fcntl(socket.handle, F_GETFL, 0);
-        return (flags & O_NONBLOCK) == O_NONBLOCK;
-#endif
+        return socket.state.user_non_blocking;
     }
 
     void non_blocking_t::set_impl(internal_::socket& socket, bool enable) noexcept {
-#ifdef __unix__
+#ifdef _WIN32
+        unsigned long mode = unsigned(enable);
+        int status = ioctlsocket(socket.handle, FIONBIO, &mode);
+        if (status == 0) {
+            socket.state.user_non_blocking = enable;
+            socket.state.internal_non_blocking = enable;
+        }
+#else
         int flags = fcntl(socket.handle, F_GETFL, 0);
         flags = enable ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK);
-        fcntl(socket.handle, F_SETFL, flags);
+        int status = fcntl(socket.handle, F_SETFL, flags);
+        if (status != -1) {
+            socket.state.user_non_blocking = enable;
+            socket.state.internal_non_blocking = enable;
+        }
 #endif
     }
 

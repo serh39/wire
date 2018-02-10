@@ -32,13 +32,13 @@
 #include <libwire/internal/socket.hpp>
 #include <libwire/internal/error/system_category.hpp>
 
-#ifndef __WIN32
-    #include <sys/socket.h>
-#else
+#ifdef _WIN32
     #include <winsock2.h>
+#else
+    #include <sys/socket.h>
 #endif
 
-#if !defined(EINTR) && defined(__WIN32)
+#if !defined(EINTR) && defined(_WIN32)
     #define EINTR WASEINTR
 #endif
 

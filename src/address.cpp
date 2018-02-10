@@ -2,7 +2,7 @@
 #include <cassert>
 #include <algorithm>
 
-#ifdef __WIN32
+#ifdef _WIN32
 #   include <ws2tcpip.h>
 #else
 #   include <arpa/inet.h>

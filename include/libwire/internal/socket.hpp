@@ -25,18 +25,19 @@
 #include <cstdint>
 #include <tuple>
 #include <system_error>
+#include <optional>
+#include <winsock2.h>
 #include <libwire/address.hpp>
 #include <libwire/protocols.hpp>
-#include <optional>
 
 namespace libwire::internal_ {
     /**
      * Thin C++ wrapper for BSD-like sockets.
      */
     struct socket {
-#ifdef __WIN32
-        using native_handle_t = unsigned long long int;
-        static constexpr native_handle_t not_initialized = 0;
+#ifdef _WIN32
+        using native_handle_t = SOCKET;
+        static constexpr native_handle_t not_initialized = INVALID_SOCKET;
 #else
         using native_handle_t = int;
 

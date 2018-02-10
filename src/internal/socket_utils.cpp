@@ -25,7 +25,7 @@
 #include <cassert>
 #include "libwire/internal/endianess.hpp"
 
-#ifdef __WIN32
+#ifdef _WIN32
 #   include <ws2tcpip.h>
 #else
 #   include <unistd.h>
@@ -66,7 +66,7 @@ sockaddr libwire::internal_::endpoint_to_sockaddr(std::tuple<libwire::address, u
 }
 
 int libwire::internal_::last_socket_error() {
-#ifdef __WIN32
+#ifdef _WIN32
     return WSAGetLastError();
 #else
     return errno;

@@ -22,7 +22,7 @@
 
 #include <libwire/internal/error/dns_category.hpp>
 
-#ifdef __WIN32
+#ifdef _WIN32
     #include <ws2tcpip.h>
 #else
     #include <netdb.h>
