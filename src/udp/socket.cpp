@@ -31,7 +31,7 @@ namespace libwire::udp {
     }
 
     internal_::socket::native_handle_t socket::native_handle() const {
-        return implementation.native_handle();
+        return implementation.handle;
     }
 
     void socket::bind(address source, uint16_t port, std::error_code& ec) noexcept {

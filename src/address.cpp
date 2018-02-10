@@ -2,8 +2,10 @@
 #include <cassert>
 #include <algorithm>
 
-#if __unix__
-#    include <arpa/inet.h> // inet_pton on POSIX systems
+#ifdef __WIN32
+#   include <ws2tcpip.h>
+#else
+#   include <arpa/inet.h>
 #endif
 
 namespace libwire {
@@ -26,7 +28,6 @@ namespace libwire {
 #endif
 
     address::address(const std::string_view& text_ip, bool& success) noexcept : version(ip::v4), parts{} {
-#ifdef __unix__
         int family = AF_INET;
         for (const char& ch : text_ip) {
             if (ch == ':') {
@@ -37,24 +38,18 @@ namespace libwire {
 
         success = bool(inet_pton(family, text_ip.data(), parts.data()));
         // ^ returns 1 on success, 0 otherwise.
-#else
-#    error "libwire doesn't supports your platform. :("
-#endif
     }
 
     std::string address::to_string() const noexcept {
-#ifdef __unix__
         int family = (version == ip::v4) ? AF_INET : AF_INET6;
 
         std::array<char, 45> buffer;
 
-        const char* buf_ptr = inet_ntop(family, parts.data(), buffer.data(), buffer.size());
+        // Cast is required because on Windows this function accepts void*.
+        const char* buf_ptr = inet_ntop(family, (void*)(parts.data()), buffer.data(), buffer.size());
         assert(buf_ptr != nullptr); // This function generally should not fail.
 
         return std::string(buffer.data());
-#else
-#    error "libwire doesn't supports your platform. :("
-#endif
     }
 
     bool address::operator==(const address& o) const noexcept {

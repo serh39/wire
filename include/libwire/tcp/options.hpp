@@ -68,7 +68,7 @@ namespace libwire::tcp {
         /**
          * Dummy type for \ref timeout option.
          */
-        struct timeout_t {
+        struct retransmission_timeout_t {
             template<typename Duration>
             static void set(socket& socket, Duration d) noexcept {
                 namespace ch = std::chrono;
@@ -98,7 +98,7 @@ namespace libwire::tcp {
          * Usually you don't have to worry about timeouts, most systems by
          * default have giant transmission timeout (up to 2 hours on UNIXes).
          */
-        constexpr timeout_t timeout{};
+        constexpr retransmission_timeout_t timeout{};
 
         /**
          * Dummy type for \ref keep_alive option.

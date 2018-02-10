@@ -66,11 +66,34 @@ const char* libwire::internal_::system_category::name() const noexcept {
 }
 
 std::string libwire::internal_::system_category::message(int code) const noexcept {
-    if (code == EOF) {
-        return "End of file";
+    switch (code) {
+    case 0:                  return "Success";
+    case EOF:                return "End of file";
+    case EINVAL:             return "Invalid argument";
+    case EACCES:             return "Permission denied";
+    case EAGAIN:             return "Operation would block";
+#if EAGAIN != EWOULDBLOCK
+    case EWOULDBLOCK:        return "Operation would block";
+#endif
+    case ENOBUFS:            return "No buffer space";
+    case ENOMEM:             return "Out of memory";
+    case EINPROGRESS:        return "Operation in progress";
+    case EALREADY:           return "Already running";
+    case EINTR:              return "System call interrupted";
+    case EMFILE:             return "Per-process limit hit";
+    case ENFILE:             return "System-wide limit hit";
+    case EPROTONOSUPPORT:    return "Protocol not supported";
+    case EAFNOSUPPORT:       return "Protocol not supported";
+    case ECONNREFUSED:       return "Connection refused";
+    case EADDRINUSE:         return "Address already in use";
+    case EADDRNOTAVAIL:      return "Address not available";
+    case ECONNABORTED:       return "Connection aborted";
+    case ECONNRESET:         return "Connection reset";
+    case ESHUTDOWN:          return "Endpoint shutdown";
+    case EHOSTDOWN:          return "Host is down";
+    case EHOSTUNREACH:       return "Host is unreachable";
+    default:                 return "Unknown error";
     }
-
-    return strerror(code);
 }
 
 std::error_condition libwire::internal_::system_category::default_error_condition(int code) const noexcept {

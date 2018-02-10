@@ -6,30 +6,41 @@
 #include "libwire/internal/endianess.hpp"
 #include "libwire/error.hpp"
 
-/*
- * README
- *
- * There is ongoing work on Windows support, don't ask why there is Windows
- * code. This socket.cpp will be moved to different place when it's ready.
- */
-
 #ifdef __WIN32
-#   include <winsock2.h>
+#   include <ws2tcpip.h>
 #   define SHUT_RD SD_RECEIVE
 #   define SHUT_WR SD_SEND
 #   define SHUT_RDWR SD_BOTH
+#   define close closesocket
 #else
 #   include <unistd.h>
 #   include <sys/socket.h>
 #   include <netinet/ip.h>
-
 #   define INVALID_SOCKET (-1)
 #endif
 
 namespace libwire::internal_ {
+#ifdef __WIN32
+    struct Initializer {
+        Initializer() {
+            WSAData data;
+            [[maybe_unused]] int status = WSAStartup(MAKEWORD(2, 2), &data);
+            assert(status == 0);
+        }
+
+        ~Initializer() {
+            WSACleanup();
+        }
+    };
+#endif
+
     unsigned socket::max_pending_connections = SOMAXCONN;
 
     socket::socket(ip ipver, transport transport, std::error_code& ec) noexcept {
+#ifdef __WIN32
+        static Initializer init;
+#endif
+
         int domain;
         switch (ipver) {
         case ip::v4: domain = AF_INET; break;
@@ -71,10 +82,6 @@ namespace libwire::internal_ {
 
     socket::~socket() {
         if (handle != not_initialized) close(handle);
-    }
-
-    socket::native_handle_t socket::native_handle() const noexcept {
-        return handle;
     }
 
     void socket::shutdown(bool read, bool write) noexcept {
@@ -141,14 +148,14 @@ namespace libwire::internal_ {
     size_t socket::write(const void* input, size_t length_bytes, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        ssize_t actually_written = error_wrapper(ec, ::send, handle, input, length_bytes, IO_FLAGS);
+        ssize_t actually_written = error_wrapper(ec, ::send, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS);
         return size_t(actually_written);
     }
 
     size_t socket::read(void* output, size_t length_bytes, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        ssize_t actually_readen = error_wrapper(ec, recv, handle, output, length_bytes, IO_FLAGS);
+        ssize_t actually_readen = error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, IO_FLAGS);
         if (actually_readen == 0 && length_bytes != 0) {
             // We wanted more than zero bytes but got zero, looks like EOF.
             ec = std::error_code(EOF, error::system_category());
@@ -192,9 +199,9 @@ namespace libwire::internal_ {
         ssize_t actually_written;
         if (destination) {
             sockaddr addr = endpoint_to_sockaddr(*destination);
-            actually_written = error_wrapper(ec, sendto, handle, input, length_bytes, IO_FLAGS, &addr, uint32_t(sizeof(sockaddr)));
+            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS, &addr, uint32_t(sizeof(sockaddr)));
         } else {
-            actually_written = error_wrapper(ec, sendto, handle, input, length_bytes, IO_FLAGS, nullptr, 0u);
+            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS, nullptr, 0u);
         }
     }
 
@@ -204,9 +211,9 @@ namespace libwire::internal_ {
         sockaddr sockaddr;
         socklen_t socklen = sizeof(sockaddr);
 
-        ssize_t received_bytes = error_wrapper(ec, ::recvfrom, handle, output, length_bytes, IO_FLAGS, &sockaddr, &socklen);
+        ssize_t received_bytes = error_wrapper(ec, ::recvfrom, handle, reinterpret_cast<char*>(output), length_bytes, IO_FLAGS, &sockaddr, &socklen);
 
         std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sockaddr);
         return {std::get<0>(endpoint), std::get<1>(endpoint), received_bytes};
     }
-} // namespace libwire::internal_
+} // namespace libwire::internal

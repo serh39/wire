@@ -23,9 +23,14 @@
 #include "libwire/tcp/options.hpp"
 #include "libwire/tcp/socket.hpp"
 #include <cassert>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
+
+#ifdef __WIN32
+    #include <ws2tcpip.h>
+#else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <netinet/tcp.h>
+#endif
 
 /**
  * This file implements options specified in options.hpp header
@@ -40,13 +45,13 @@ using namespace std::literals::chrono_literals;
 namespace libwire::tcp {
     inline namespace options {
         void keep_alive_t::set(socket& sock, bool enabled) noexcept {
-            setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, &enabled, sizeof(bool));
+            setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, (const char*)&enabled, sizeof(bool));
         }
 
         bool keep_alive_t::get(const socket& sock) noexcept {
             int result;
             socklen_t result_size = sizeof(result);
-            getsockopt(sock.native_handle(), SOL_SOCKET, SO_KEEPALIVE, &result, &result_size);
+            getsockopt(sock.native_handle(), SOL_SOCKET, SO_KEEPALIVE, (char*)&result, &result_size);
             assert(result_size == sizeof(result));
             return bool(result);
         }
@@ -55,28 +60,26 @@ namespace libwire::tcp {
             struct linger linger_opt {};
             linger_opt.l_onoff = int(enabled);
             linger_opt.l_linger = int(timeout.count());
-            setsockopt(sock.native_handle(), SOL_SOCKET, SO_LINGER, &linger_opt, sizeof(linger_opt));
+            setsockopt(sock.native_handle(), SOL_SOCKET, SO_LINGER, (const char*)&linger_opt, sizeof(linger_opt));
         }
 
         std::tuple<bool, std::chrono::seconds> linger_t::get(const socket& sock) noexcept {
             struct linger linger_opt {};
             socklen_t opt_size = sizeof(linger_opt);
-            getsockopt(sock.native_handle(), SOL_SOCKET, SO_LINGER, &linger_opt, &opt_size);
+            getsockopt(sock.native_handle(), SOL_SOCKET, SO_LINGER, (char*)&linger_opt, &opt_size);
             assert(opt_size == sizeof(linger_opt));
             return {bool(linger_opt.l_onoff), std::chrono::seconds(linger_opt.l_linger)};
         }
 
-        void timeout_t::set_impl(socket& sock, std::chrono::milliseconds timeout) noexcept {
+        void retransmission_timeout_t::set_impl([[maybe_unused]] socket& sock, [[maybe_unused]] std::chrono::milliseconds timeout) noexcept {
 #ifdef TCP_USER_TIMEOUT
             auto timeout_count = unsigned(timeout.count());
             setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_USER_TIMEOUT, &timeout_count, sizeof(timeout_count));
 #else
-            (void)sock;
-            (void)timeout; // Silence "unused parameter" warnings.
 #endif
         }
 
-        std::chrono::milliseconds timeout_t::get(const socket& sock) noexcept {
+        std::chrono::milliseconds retransmission_timeout_t::get([[maybe_unused]] const socket& sock) noexcept {
 #ifdef TCP_USER_TIMEOUT
             unsigned result;
             socklen_t result_size = sizeof(result);
@@ -89,13 +92,13 @@ namespace libwire::tcp {
         }
 
         void no_delay_t::set(socket& sock, bool enabled) noexcept {
-            setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, &enabled, sizeof(bool));
+            setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, (const char*)&enabled, sizeof(bool));
         }
 
         bool no_delay_t::get(const socket& sock) noexcept {
             int result;
             socklen_t result_size = sizeof(result);
-            getsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, &result, &result_size);
+            getsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, (char*)&result, &result_size);
             assert(result_size == sizeof(result));
             return bool(result);
         }

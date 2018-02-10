@@ -91,18 +91,12 @@ namespace libwire::error {
 
         /**
          * Error code not mapped to any other condition.
-         *
-         * \note std::error_code::message may still return
-         * readable description.
          */
         unknown = 255,
 
         /**
          * Error code that should not occur on normal library
          * operation. Causes program termination in debug builds.
-         *
-         * Report it as a bug with std::error_code::message
-         * output.
          */
         unexpected = 254,
 

@@ -96,6 +96,12 @@ namespace libwire::tcp {
         internal_::socket::native_handle_t native_handle() const noexcept;
 
         /**
+         * Get internal socket object.
+         */
+        internal_::socket& implementation() noexcept;
+        const internal_::socket& implementation() const noexcept;
+
+        /**
          * Check whether underlying socket is open.
          *
          * \warning Even if \ref is_open returns true connection may be in
@@ -371,7 +377,7 @@ namespace libwire::tcp {
 
         ///@}
     private:
-        internal_::socket implementation;
+        internal_::socket implementation_;
 
         // Used as internal socket state tracker.
         bool open = false;
@@ -387,7 +393,7 @@ namespace libwire::tcp {
         // Read exactly bytes_count bytes, retrying when needed.
         while (total_received < bytes_count) {
             size_t bytes_received =
-                implementation.read(output.data() + total_received, bytes_count - total_received, ec);
+                implementation_.read(output.data() + total_received, bytes_count - total_received, ec);
             if (ec) break;
             total_received += bytes_received;
         }
@@ -413,7 +419,7 @@ namespace libwire::tcp {
         static_assert(sizeof(std::remove_pointer_t<decltype(input.data())>) == sizeof(uint8_t),
                       "socket::write can't be used with container with non-byte elements");
 
-        auto res = implementation.write(input.data(), input.size(), ec);
+        auto res = implementation_.write(input.data(), input.size(), ec);
         open = (ec != error::generic::disconnected);
         return res;
     }

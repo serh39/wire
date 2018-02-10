@@ -34,7 +34,10 @@ namespace libwire::internal_ {
      * Thin C++ wrapper for BSD-like sockets.
      */
     struct socket {
-#ifdef __unix__
+#ifdef __WIN32
+        using native_handle_t = unsigned long long int;
+        static constexpr native_handle_t not_initialized = 0;
+#else
         using native_handle_t = int;
 
         /**
@@ -44,11 +47,6 @@ namespace libwire::internal_ {
          * \note Prefer to use operator bool() for this check.
          */
         static constexpr native_handle_t not_initialized = -1;
-#else
-        using native_handle_t = void*;
-        static constexpr native_handle_t not_initialized = nullptr;
-
-    #error "Your platform is not supported by libwire. :("
 #endif
 
         static unsigned max_pending_connections;
@@ -79,8 +77,6 @@ namespace libwire::internal_ {
          * May block if there are unsent data left.
          */
         ~socket();
-
-        native_handle_t native_handle() const noexcept;
 
         /**
          * Connect socket to remote endpoint, set ec if any error
@@ -149,7 +145,15 @@ namespace libwire::internal_ {
 
         const ip ip_version = ip(0);
         const transport transport_protocol = transport(0);
-    private:
+
+        struct {
+            /// Is user requested non-blocking I/O mode?
+            bool user_non_blocking     : 1;
+
+            /// Do we really have non-blocking socket now?
+            bool internal_non_blocking : 1;
+        } state{};
+
         native_handle_t handle = not_initialized;
     };
 } // namespace libwire::internal_

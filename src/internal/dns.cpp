@@ -24,18 +24,29 @@
 #include "libwire/error.hpp"
 #include <cstring>
 #include <cassert>
-#include <netdb.h>
+
+#ifdef __WIN32
+#   include <ws2tcpip.h>
+#else
+#   include <netdb.h>
+#endif
 
 namespace libwire::dns {
+    inline std::error_code last_dns_error(int status) {
+#ifdef EAI_SYSTEM
+        if (status == EAI_SYSTEM) {
+            return {errno, error::system_category()};
+        }
+#endif
+        return {status, error::dns_category()};
+    }
+
     std::vector<address> resolve(ip protocol, const std::string_view& domain, std::error_code& ec) noexcept {
         addrinfo* result_raw = nullptr;
 
         int status = getaddrinfo(domain.data(), nullptr, nullptr, &result_raw);
         if (status != 0) {
-            if (status == EAI_SYSTEM) {
-                ec = std::error_code(errno, error::system_category());
-            }
-            ec = std::error_code(status, error::dns_category());
+            ec = last_dns_error(status);
             assert(ec != error::unexpected);
             return {};
         }

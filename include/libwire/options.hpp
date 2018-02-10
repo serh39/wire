@@ -41,8 +41,8 @@ namespace libwire {
         }
 
     private:
-        static bool get_impl(internal_::socket::native_handle_t) noexcept;
-        static void set_impl(internal_::socket::native_handle_t, bool) noexcept;
+        static bool get_impl(const internal_::socket&) noexcept;
+        static void set_impl(internal_::socket&, bool) noexcept;
     };
 
     /**
@@ -72,8 +72,8 @@ namespace libwire {
         }
 
     private:
-        static std::chrono::milliseconds get_impl(internal_::socket::native_handle_t) noexcept;
-        static void set_impl(internal_::socket::native_handle_t, std::chrono::milliseconds) noexcept;
+        static std::chrono::milliseconds get_impl(const internal_::socket&) noexcept;
+        static void set_impl(internal_::socket&, std::chrono::milliseconds) noexcept;
     };
 
     /**
@@ -100,8 +100,8 @@ namespace libwire {
         }
 
     private:
-        static std::chrono::milliseconds get_impl(internal_::socket::native_handle_t) noexcept;
-        static void set_impl(internal_::socket::native_handle_t, std::chrono::milliseconds) noexcept;
+        static std::chrono::milliseconds get_impl(const internal_::socket&) noexcept;
+        static void set_impl(internal_::socket&, std::chrono::milliseconds) noexcept;
     };
 
     /**
@@ -126,8 +126,8 @@ namespace libwire {
         }
 
     private:
-        static size_t get_impl(internal_::socket::native_handle_t) noexcept;
-        static void set_impl(internal_::socket::native_handle_t, size_t) noexcept;
+        static size_t get_impl(const internal_::socket&) noexcept;
+        static void set_impl(internal_::socket&, size_t) noexcept;
     };
 
     constexpr send_buffer_size_t send_buffer_size{};
@@ -144,8 +144,8 @@ namespace libwire {
         }
 
     private:
-        static size_t get_impl(internal_::socket::native_handle_t) noexcept;
-        static void set_impl(internal_::socket::native_handle_t, size_t) noexcept;
+        static size_t get_impl(const internal_::socket&) noexcept;
+        static void set_impl(internal_::socket&, size_t) noexcept;
     };
 
     constexpr receive_buffer_size_t receive_buffer_size{};

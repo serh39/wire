@@ -16,8 +16,8 @@ namespace libwire::tcp {
     template std::vector<uint8_t>& socket::read_until(uint8_t, std::vector<uint8_t>&, std::error_code&, size_t);
     template std::string& socket::read_until(uint8_t, std::string&, std::error_code&, size_t);
 
-    socket::socket(internal_::socket&& i) noexcept : implementation(std::move(i)) {
-        open = (implementation.native_handle() != internal_::socket::not_initialized);
+    socket::socket(internal_::socket&& i) noexcept : implementation_(std::move(i)) {
+        open = (implementation_.handle != internal_::socket::not_initialized);
     }
 
     socket::~socket() {
@@ -27,7 +27,7 @@ namespace libwire::tcp {
     }
 
     internal_::socket::native_handle_t socket::native_handle() const noexcept {
-        return implementation.native_handle();
+        return implementation_.handle;
     }
 
     bool socket::is_open() const {
@@ -35,29 +35,37 @@ namespace libwire::tcp {
     }
 
     void socket::connect(address target, uint16_t port, std::error_code& ec) noexcept {
-        implementation = internal_::socket(target.version, transport::tcp, ec);
+        implementation_ = internal_::socket(target.version, transport::tcp, ec);
         if (ec) return;
-        implementation.connect(target, port, ec);
+        implementation_.connect(target, port, ec);
         open = !ec;
     }
 
     void socket::close() noexcept {
         // Reassignment to null socket will call destructor and
         // close destroyed socket.
-        implementation = internal_::socket();
+        implementation_ = internal_::socket();
         open = false;
     }
 
     void socket::shutdown(bool read, bool write) noexcept {
-        implementation.shutdown(read, write);
+        implementation_.shutdown(read, write);
     }
 
     std::tuple<address, uint16_t> socket::local_endpoint() const noexcept {
-        return implementation.local_endpoint();
+        return implementation_.local_endpoint();
     }
 
     std::tuple<address, uint16_t> socket::remote_endpoint() const noexcept {
-        return implementation.remote_endpoint();
+        return implementation_.remote_endpoint();
+    }
+
+    internal_::socket& socket::implementation() noexcept {
+        return implementation_;
+    }
+
+    const internal_::socket& socket::implementation() const noexcept {
+        return implementation_;
     }
 
 #ifdef __cpp_exceptions

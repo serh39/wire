@@ -22,7 +22,11 @@
 
 #include <libwire/internal/error/dns_category.hpp>
 
-#include <netdb.h>
+#ifdef __WIN32
+    #include <ws2tcpip.h>
+#else
+    #include <netdb.h>
+#endif
 
 const char* libwire::internal_::dns_category::name() const noexcept {
     return "dns";
@@ -31,14 +35,10 @@ const char* libwire::internal_::dns_category::name() const noexcept {
 std::string libwire::internal_::dns_category::message(int code) const noexcept {
     switch (code) {
     case 0: return "Success";
-    case EAI_AGAIN: return "Host not found (try again)";
-#ifdef EAI_NODATA
-    case EAI_NODATA: return "No address";
-#endif
-#ifdef EAI_ADDRFAMILY
-    case EAI_ADDRFAMILY: return "No address";
-#endif
-    default: return "Unknown error";
+    case WSATRY_AGAIN: return "Host not found (try again)";
+    case WSANO_DATA: return "No address";
+    case WSAEAFNOSUPPORT: return "No address";
+    default: return error::system_category().message(code);
     }
 }
 
@@ -47,56 +47,37 @@ std::error_condition libwire::internal_::dns_category::default_error_condition(i
         return std::error_condition(error::success, error::system_category());
     }
 
-    if (code == EAI_AGAIN) {
+    if (code == WSATRY_AGAIN) {
         return std::error_condition(error::host_not_found_try_again, error::dns_category());
     }
 
-    // We can safetly define then to 0 because first branch cuts away
-    // real success value.
-#ifndef EAI_NODATA
-#    define EAI_NODATA 0
-#endif
-#ifndef EAI_ADDRFAMILY
-#    define EAI_ADDRFAMILY 0
-#endif
-
-    if (code == EAI_NODATA || code == EAI_ADDRFAMILY) {
+    if (code == WSANO_DATA || code == WSAEAFNOSUPPORT) {
         return std::error_condition(error::no_address, error::dns_category());
     }
 
-    if (code == EAI_BADFLAGS || code == EAI_SERVICE || code == EAI_SOCKTYPE) {
+    if (code == WSAEINVAL || code == WSATYPE_NOT_FOUND|| code == WSAESOCKTNOSUPPORT) {
         return std::error_condition(error::unexpected, error::system_category());
     }
 
-    return std::error_condition(error::unknown, error::system_category());
+    return error::system_category().default_error_condition(code);
 }
 
-bool libwire::internal_::dns_category::equivalent(int code, const std::error_condition& condition) const
-    noexcept {
+bool libwire::internal_::dns_category::equivalent(int code, const std::error_condition& condition) const noexcept {
     if (code == 0) {
         return condition.value() == error::success;
     }
 
-    if (code == EAI_AGAIN) {
+    if (code == WSATRY_AGAIN) {
         return condition.value() == error::host_not_found_try_again;
     }
 
-    // We can safetly define then to 0 because first branch cuts away
-    // real success value.
-#ifndef EAI_NODATA
-#    define EAI_NODATA 0
-#endif
-#ifndef EAI_ADDRFAMILY
-#    define EAI_ADDRFAMILY 0
-#endif
-
-    if (code == EAI_NODATA || code == EAI_ADDRFAMILY) {
+    if (code == WSANO_DATA || code == WSAEAFNOSUPPORT) {
         return condition.value() == error::no_address;
     }
 
-    if (code == EAI_BADFLAGS || code == EAI_SERVICE || code == EAI_SOCKTYPE) {
+    if (code == WSAEINVAL || code == WSATYPE_NOT_FOUND || code == WSAESOCKTNOSUPPORT) {
         return condition.value() == error::unexpected;
     }
 
-    return condition.value() == error::unknown;
+    return error::system_category().equivalent(code, condition);
 }

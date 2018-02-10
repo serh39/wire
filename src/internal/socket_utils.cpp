@@ -23,8 +23,15 @@
 #include "libwire/internal/socket_utils.hpp"
 
 #include <cassert>
-#include <netinet/in.h>
 #include "libwire/internal/endianess.hpp"
+
+#ifdef __WIN32
+#   include <ws2tcpip.h>
+#else
+#   include <unistd.h>
+#   include <sys/socket.h>
+#   include <netinet/ip.h>
+#endif
 
 std::tuple<libwire::address, uint16_t> libwire::internal_::sockaddr_to_endpoint(sockaddr in) {
     if (in.sa_family == AF_INET) {
