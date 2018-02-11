@@ -50,7 +50,7 @@ namespace libwire::udp {
          * Create socket handle and allocate UDP socket with specified
          * IP version.
          */
-        explicit socket(ip ip_version);
+        explicit socket(ip ip_version) noexcept;
 
         /**
          * Create socket handle without associated socket.
@@ -63,7 +63,7 @@ namespace libwire::udp {
         socket& operator=(const socket&) = delete;
         socket& operator=(socket&&) = default;
 
-        ~socket() = default;
+        ~socket();
 
         internal_::socket::native_handle_t native_handle() const;
 

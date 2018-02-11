@@ -64,6 +64,7 @@ namespace libwire::internal_ {
         if (handle == INVALID_SOCKET) {
             ec = std::error_code(last_socket_error(), error::system_category());
             assert(ec != error::unexpected);
+            handle = not_initialized;
         }
 
 #ifdef SO_NOSIGPIPE

@@ -24,11 +24,14 @@
 #include <cassert>
 
 namespace libwire::udp {
-    socket::socket(ip ip_version) {
-        std::error_code ec;
-        implementation = internal_::socket(ip_version, transport::udp, ec);
-        if (ec) implementation = internal_::socket();
+    socket::socket(ip ip_version) noexcept {
+        std::error_code ec; // ignored
+        open(ip_version, ec);
     }
+
+    socket::~socket() {
+        close();
+    };
 
     internal_::socket::native_handle_t socket::native_handle() const {
         return implementation_.handle;
