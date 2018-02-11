@@ -36,6 +36,7 @@
 #    include <winsock2.h>
 #else
 #    include <sys/socket.h>
+#    include <netinet/in.h>
 #endif
 
 #if !defined(EINTR) && defined(_WIN32)
@@ -43,8 +44,13 @@
 #endif
 
 namespace libwire::internal_ {
-    std::tuple<address, uint16_t> sockaddr_to_endpoint(sockaddr in);
-    sockaddr endpoint_to_sockaddr(std::tuple<address, uint16_t> in);
+    std::tuple<address, uint16_t> sockaddr_to_endpoint(sockaddr_storage in);
+
+    /**
+     * Convert socket endpoint (tuple) to sockaddr used by BSD-like
+     * sockets interface.
+     */
+    sockaddr_storage endpoint_to_sockaddr(std::tuple<address, uint16_t> in);
 
     int last_socket_error();
 

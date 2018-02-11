@@ -100,19 +100,16 @@ namespace libwire::internal_ {
     void socket::connect(address target, uint16_t port, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        struct sockaddr address = endpoint_to_sockaddr({target, port});
+        sockaddr_storage address = endpoint_to_sockaddr({target, port});
 
-        error_wrapper(ec, ::connect, handle, &address, socklen_t(sizeof(address)));
+        error_wrapper(ec, ::connect, handle, reinterpret_cast<sockaddr*>(&address), socklen_t(sizeof(address)));
     }
 
     void socket::bind(uint16_t port, address interface_address, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        sockaddr_in address{};
-        address.sin_family = AF_INET;
-        address.sin_port = host_to_network(port);
-        address.sin_addr = *reinterpret_cast<in_addr*>(interface_address.parts.data());
-
+        // sockaddr doesn't have enough space to store sockaddr_in6 but we don't care
+        sockaddr_storage address = endpoint_to_sockaddr({interface_address, port});
         error_wrapper(ec, ::bind, handle, reinterpret_cast<sockaddr*>(&address), socklen_t(sizeof(address)));
     }
 
@@ -174,9 +171,9 @@ namespace libwire::internal_ {
     std::tuple<address, uint16_t> socket::local_endpoint() const noexcept {
         assert(handle != not_initialized);
 
-        sockaddr sock_address{};
+        sockaddr_storage sock_address{};
         socklen_t length = sizeof(sock_address);
-        [[maybe_unused]] int status = getsockname(handle, &sock_address, &length);
+        [[maybe_unused]] int status = getsockname(handle, reinterpret_cast<sockaddr*>(&sock_address), &length);
 #ifndef NDEBUG
         if (status < 0) return {{0, 0, 0, 0}, 0u};
 #endif
@@ -186,9 +183,9 @@ namespace libwire::internal_ {
     std::tuple<address, uint16_t> socket::remote_endpoint() const noexcept {
         assert(handle != not_initialized);
 
-        sockaddr sock_address{};
+        sockaddr_storage sock_address{};
         socklen_t length = sizeof(sock_address);
-        [[maybe_unused]] int status = getpeername(handle, &sock_address, &length);
+        [[maybe_unused]] int status = getpeername(handle, reinterpret_cast<sockaddr*>(&sock_address), &length);
 #ifndef NDEBUG
         if (status < 0) return {{0, 0, 0, 0}, 0u};
 #endif
@@ -201,9 +198,10 @@ namespace libwire::internal_ {
 
         ssize_t actually_written;
         if (destination) {
-            sockaddr addr = endpoint_to_sockaddr(*destination);
-            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes,
-                                             IO_FLAGS, &addr, uint32_t(sizeof(sockaddr)));
+            sockaddr_storage addr = endpoint_to_sockaddr(*destination);
+            actually_written =
+                error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS,
+                              reinterpret_cast<sockaddr*>(&addr), uint32_t(sizeof(sockaddr_in6)));
         } else {
             actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes,
                                              IO_FLAGS, nullptr, 0u);
@@ -215,13 +213,13 @@ namespace libwire::internal_ {
                                                                std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        sockaddr sockaddr;
-        socklen_t socklen = sizeof(sockaddr);
+        sockaddr_storage sock_address;
+        socklen_t socklen = sizeof(sock_address);
 
         ssize_t received_bytes = error_wrapper(ec, ::recvfrom, handle, reinterpret_cast<char*>(output), length_bytes,
-                                               IO_FLAGS, &sockaddr, &socklen);
+                                               IO_FLAGS, reinterpret_cast<sockaddr*>(&sock_address), &socklen);
 
-        std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sockaddr);
+        std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sock_address);
         return {std::get<0>(endpoint), std::get<1>(endpoint), received_bytes};
     }
 } // namespace libwire::internal_
