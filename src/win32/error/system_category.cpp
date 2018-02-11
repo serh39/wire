@@ -65,6 +65,7 @@ const char* libwire::internal_::system_category::name() const noexcept {
 }
 
 std::string libwire::internal_::system_category::message(int code) const noexcept {
+    // clang-format off
     switch (code) {
     case 0:                     return "Success";
     case EOF:                   return "End of file";
@@ -89,6 +90,7 @@ std::string libwire::internal_::system_category::message(int code) const noexcep
     case WSAEHOSTUNREACH:       return "Host is unreachable";
     default:                    return "Unknown error";
     }
+    // clang-format on
 }
 
 std::error_condition libwire::internal_::system_category::default_error_condition(int code) const noexcept {

@@ -26,11 +26,11 @@
 #include "libwire/internal/endianess.hpp"
 
 #ifdef _WIN32
-#   include <ws2tcpip.h>
+#    include <ws2tcpip.h>
 #else
-#   include <unistd.h>
-#   include <sys/socket.h>
-#   include <netinet/ip.h>
+#    include <unistd.h>
+#    include <sys/socket.h>
+#    include <netinet/ip.h>
 #endif
 
 std::tuple<libwire::address, uint16_t> libwire::internal_::sockaddr_to_endpoint(sockaddr in) {

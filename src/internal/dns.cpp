@@ -26,9 +26,9 @@
 #include <cassert>
 
 #ifdef _WIN32
-#   include <ws2tcpip.h>
+#    include <ws2tcpip.h>
 #else
-#   include <netdb.h>
+#    include <netdb.h>
 #endif
 
 namespace libwire::dns {

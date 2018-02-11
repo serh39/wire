@@ -25,11 +25,11 @@
 #include <cassert>
 
 #ifdef _WIN32
-    #include <ws2tcpip.h>
+#    include <ws2tcpip.h>
 #else
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <netinet/tcp.h>
+#    include <sys/socket.h>
+#    include <netinet/in.h>
+#    include <netinet/tcp.h>
 #endif
 
 /**
@@ -71,7 +71,8 @@ namespace libwire::tcp {
             return {bool(linger_opt.l_onoff), std::chrono::seconds(linger_opt.l_linger)};
         }
 
-        void retransmission_timeout_t::set_impl([[maybe_unused]] socket& sock, [[maybe_unused]] std::chrono::milliseconds timeout) noexcept {
+        void retransmission_timeout_t::set_impl([[maybe_unused]] socket& sock,
+                                                [[maybe_unused]] std::chrono::milliseconds timeout) noexcept {
 #ifdef TCP_USER_TIMEOUT
             auto timeout_count = unsigned(timeout.count());
             setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_USER_TIMEOUT, &timeout_count, sizeof(timeout_count));

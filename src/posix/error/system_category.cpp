@@ -66,6 +66,7 @@ const char* libwire::internal_::system_category::name() const noexcept {
 }
 
 std::string libwire::internal_::system_category::message(int code) const noexcept {
+    // clang-format off
     switch (code) {
     case 0:                  return "Success";
     case EOF:                return "End of file";
@@ -94,13 +95,13 @@ std::string libwire::internal_::system_category::message(int code) const noexcep
     case EHOSTUNREACH:       return "Host is unreachable";
     default:                 return "Unknown error";
     }
+    // clang-format on
 }
 
 std::error_condition libwire::internal_::system_category::default_error_condition(int code) const noexcept {
 #define MAP_CODE(errno_code, condition_code) \
     if (code == (errno_code)) return std::error_condition((condition_code), *this)
-#define MAP_CODE_3(errno_code, condition_code, generic_condition) \
-    MAP_CODE(errno_code, condition_code)
+#define MAP_CODE_3(errno_code, condition_code, generic_condition) MAP_CODE(errno_code, condition_code)
 
     ERRORS_MAP;
 
@@ -109,8 +110,7 @@ std::error_condition libwire::internal_::system_category::default_error_conditio
 #undef MAP_CODE_3
 }
 
-bool libwire::internal_::system_category::equivalent(int code, const std::error_condition& condition) const
-    noexcept {
+bool libwire::internal_::system_category::equivalent(int code, const std::error_condition& condition) const noexcept {
 #define MAP_CODE(errno_code, condition_code) \
     if (code == (errno_code)) return condition.value() == (condition_code)
 #define MAP_CODE_3(errno_code, condition_code, generic_code) \

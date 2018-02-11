@@ -26,9 +26,12 @@
 #include <tuple>
 #include <system_error>
 #include <optional>
-#include <winsock2.h>
 #include <libwire/address.hpp>
 #include <libwire/protocols.hpp>
+
+#ifdef _WIN32
+#    include <winsock2.h>
+#endif
 
 namespace libwire::internal_ {
     /**
@@ -126,14 +129,15 @@ namespace libwire::internal_ {
          * Send length_bytes from input to destination, set ec if any error
          * occurred.
          */
-        void send_to(const void* input, size_t length_bytes, std::error_code& ec,
-                     std::optional<std::tuple<address, uint16_t>> destination) noexcept;
+        size_t send_to(const void* input, size_t length_bytes, std::error_code& ec,
+                       std::optional<std::tuple<address, uint16_t>> destination) noexcept;
 
         /**
          * Read length_bytes from socket datagram queue to output, set ec if
          * any occurred, return source endpoint and actual size of datagram.
          */
-        std::tuple<address, uint16_t, size_t> receive_from(void* output, size_t length_bytes, std::error_code& ec) noexcept;
+        std::tuple<address, uint16_t, size_t> receive_from(void* output, size_t length_bytes,
+                                                           std::error_code& ec) noexcept;
 
         /**
          * Allows to check whether socket is initialized and can be operated on.
@@ -149,7 +153,7 @@ namespace libwire::internal_ {
 
         struct {
             /// Is user requested non-blocking I/O mode?
-            bool user_non_blocking     : 1;
+            bool user_non_blocking : 1;
 
             /// Do we really have non-blocking socket now?
             bool internal_non_blocking : 1;

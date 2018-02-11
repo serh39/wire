@@ -33,13 +33,13 @@
 #include <libwire/internal/error/system_category.hpp>
 
 #ifdef _WIN32
-    #include <winsock2.h>
+#    include <winsock2.h>
 #else
-    #include <sys/socket.h>
+#    include <sys/socket.h>
 #endif
 
 #if !defined(EINTR) && defined(_WIN32)
-    #define EINTR WASEINTR
+#    define EINTR WASEINTR
 #endif
 
 namespace libwire::internal_ {

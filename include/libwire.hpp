@@ -11,3 +11,4 @@ namespace libwire {} // namespace libwire
 #include "libwire/dns.hpp"
 #include "libwire/options.hpp"
 #include "libwire/tcp.hpp"
+#include "libwire/udp.hpp"

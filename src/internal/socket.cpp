@@ -7,17 +7,17 @@
 #include "libwire/error.hpp"
 
 #ifdef _WIN32
-#   include <ws2tcpip.h>
-#   define SHUT_RD SD_RECEIVE
-#   define SHUT_WR SD_SEND
-#   define SHUT_RDWR SD_BOTH
-#   define close closesocket
-#   define ssize_t int64_t
+#    include <ws2tcpip.h>
+#    define SHUT_RD SD_RECEIVE
+#    define SHUT_WR SD_SEND
+#    define SHUT_RDWR SD_BOTH
+#    define close closesocket
+#    define ssize_t int64_t
 #else
-#   include <unistd.h>
-#   include <sys/socket.h>
-#   include <netinet/ip.h>
-#   define INVALID_SOCKET (-1)
+#    include <unistd.h>
+#    include <sys/socket.h>
+#    include <netinet/ip.h>
+#    define INVALID_SOCKET (-1)
 #endif
 
 namespace libwire::internal_ {
@@ -149,14 +149,16 @@ namespace libwire::internal_ {
     size_t socket::write(const void* input, size_t length_bytes, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        ssize_t actually_written = error_wrapper(ec, ::send, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS);
+        ssize_t actually_written =
+            error_wrapper(ec, ::send, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS);
         return size_t(actually_written);
     }
 
     size_t socket::read(void* output, size_t length_bytes, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
-        ssize_t actually_readen = error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, IO_FLAGS);
+        ssize_t actually_readen =
+            error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, IO_FLAGS);
         if (actually_readen == 0 && length_bytes != 0) {
             // We wanted more than zero bytes but got zero, looks like EOF.
             ec = std::error_code(EOF, error::system_category());
@@ -193,28 +195,33 @@ namespace libwire::internal_ {
         return sockaddr_to_endpoint(sock_address);
     }
 
-    void socket::send_to(const void* input, size_t length_bytes, std::error_code& ec,
-                         std::optional<std::tuple<address, uint16_t>> destination) noexcept {
+    size_t socket::send_to(const void* input, size_t length_bytes, std::error_code& ec,
+                           std::optional<std::tuple<address, uint16_t>> destination) noexcept {
         assert(handle != not_initialized);
 
         ssize_t actually_written;
         if (destination) {
             sockaddr addr = endpoint_to_sockaddr(*destination);
-            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS, &addr, uint32_t(sizeof(sockaddr)));
+            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes,
+                                             IO_FLAGS, &addr, uint32_t(sizeof(sockaddr)));
         } else {
-            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS, nullptr, 0u);
+            actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes,
+                                             IO_FLAGS, nullptr, 0u);
         }
+        return actually_written < 0 ? 0 : size_t(actually_written);
     }
 
-    std::tuple<address, uint16_t, size_t> socket::receive_from(void* output, size_t length_bytes, std::error_code& ec) noexcept {
+    std::tuple<address, uint16_t, size_t> socket::receive_from(void* output, size_t length_bytes,
+                                                               std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
         sockaddr sockaddr;
         socklen_t socklen = sizeof(sockaddr);
 
-        ssize_t received_bytes = error_wrapper(ec, ::recvfrom, handle, reinterpret_cast<char*>(output), length_bytes, IO_FLAGS, &sockaddr, &socklen);
+        ssize_t received_bytes = error_wrapper(ec, ::recvfrom, handle, reinterpret_cast<char*>(output), length_bytes,
+                                               IO_FLAGS, &sockaddr, &socklen);
 
         std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sockaddr);
         return {std::get<0>(endpoint), std::get<1>(endpoint), received_bytes};
     }
-} // namespace libwire::internal
+} // namespace libwire::internal_

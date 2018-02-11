@@ -29,7 +29,6 @@
 #include <libwire/error.hpp>
 #include <libwire/internal/socket.hpp>
 
-
 /*
  * If you had to open this file to find answer for your question - we are so
  * sorry. Please open issue with your question so we can update documentation
@@ -435,7 +434,8 @@ namespace libwire::tcp {
         while (read(1, view, ec), !ec) {
             if (byte == delimiter) break;
             if (max_size != 0 && buf.size() == max_size) break;
-            buf.push_back(byte);
+            // Reinterpret cast is only way to safetly convert bytes between char and unsigned char representation.
+            buf.push_back(*reinterpret_cast<typename Buffer::value_type*>(&byte));
         }
         return buf;
     }

@@ -178,8 +178,9 @@ namespace libwire::udp {
          *
          * Errors will be reported using ec argument.
          */
-        template<typename Buffer =  std::vector<uint8_t>>
-        void write(const Buffer& input, std::error_code& ec, std::optional<std::tuple<address, uint16_t>> destination = {}) noexcept;
+        template<typename Buffer = std::vector<uint8_t>>
+        void write(const Buffer& input, std::error_code& ec,
+                   std::optional<std::tuple<address, uint16_t>> destination = {}) noexcept;
 
 #ifdef __cpp_exceptions
         /**
@@ -209,7 +210,7 @@ namespace libwire::udp {
                       "socket::read can't be used with container with non-byte elements");
 
         output.resize(max_size);
-        auto [ address, port, size ] = implementation.receive_from(output.data(), max_size, ec);
+        auto [address, port, size] = implementation.receive_from(output.data(), max_size, ec);
         output.resize(size);
         return {address, port};
     }
