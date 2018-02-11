@@ -2,15 +2,15 @@
 
 namespace libwire::tcp {
     void listener::listen(address local_address, uint16_t port, std::error_code& ec, unsigned max_backlog) noexcept {
-        implementation = internal_::socket(local_address.version, transport::tcp, ec);
+        implementation_ = internal_::socket(local_address.version, transport::tcp, ec);
         if (ec) return;
-        implementation.bind(port, local_address, ec);
+        implementation_.bind(port, local_address, ec);
         if (ec) return;
-        implementation.listen(int(max_backlog), ec);
+        implementation_.listen(int(max_backlog), ec);
     }
 
     socket listener::accept(std::error_code& ec) noexcept {
-        return {implementation.accept(ec)};
+        return {implementation_.accept(ec)};
     }
 
 #ifdef __cpp_exceptions
@@ -26,5 +26,18 @@ namespace libwire::tcp {
         if (ec) throw std::system_error(ec);
         return sock;
     }
+
+    internal_::socket::native_handle_t listener::native_handle() const noexcept {
+        return implementation_.handle;
+    }
+
+    const internal_::socket& listener::implementation() const noexcept {
+        return implementation_;
+    }
+
+    internal_::socket& listener::implementation() noexcept {
+        return implementation_;
+    }
+
 #endif
 } // namespace libwire::tcp

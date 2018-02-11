@@ -81,6 +81,34 @@ namespace libwire::tcp {
         }
 #endif
 
+        internal_::socket::native_handle_t native_handle() const noexcept;
+
+        const internal_::socket& implementation() const noexcept;
+
+        internal_::socket& implementation() noexcept;
+
+        /**
+         * Get option value for socket.
+         *
+         * See \ref tcp::socket::option and \ref tcp::socket::set_option
+         * for better explanation. There is no special options implemented
+         * for TCP listener but usually (it's platform-dependent) options
+         * set on listener will be inherited by sockets created by accept().
+         */
+        template<typename Option>
+        auto option(const Option& tag) const;
+
+        /**
+         * Set option value for socket.
+         *
+         * See \ref tcp::socket::option and \ref tcp::socket::set_option
+         * for better explanation. There is no special options implemented
+         * for TCP listener but usually (it's platform-dependent) options
+         * set on listener will be inherited by sockets created by accept().
+         */
+        template<typename Option, typename... Value>
+        void set_option(const Option& tag, Value&&... value);
+
         /**
          * Start listening for incoming connections on specified
          * endpoint. backlog argument sets maximum size of
@@ -122,6 +150,16 @@ namespace libwire::tcp {
 #endif // ifdef __cpp_exceptions
 
     private:
-        internal_::socket implementation;
+        internal_::socket implementation_;
     };
+
+    template<typename Option>
+    auto listener::option(const Option& /* tag */) const {
+        return Option::get(*this);
+    }
+
+    template<typename Option, typename... Value>
+    void listener::set_option(const Option& /* tag */, Value&&... value) {
+        Option::set(*this, std::forward<Value>(value)...);
+    }
 } // namespace libwire::tcp
