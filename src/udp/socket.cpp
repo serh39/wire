@@ -31,15 +31,15 @@ namespace libwire::udp {
     }
 
     internal_::socket::native_handle_t socket::native_handle() const {
-        return implementation.handle;
+        return implementation_.handle;
     }
 
     void socket::bind(address source, uint16_t port, std::error_code& ec) noexcept {
-        implementation.bind(port, source, ec);
+        implementation_.bind(port, source, ec);
     }
 
 #ifdef __cpp_exceptions
-    void socket::listen(address source, uint16_t port) {
+    void socket::bind(address source, uint16_t port) {
         std::error_code ec;
         bind(source, port, ec);
         if (ec) throw std::system_error(ec);
@@ -48,12 +48,12 @@ namespace libwire::udp {
 
     void socket::associate(address destination, uint16_t port) noexcept {
         std::error_code ec;
-        implementation.connect(destination, port, ec);
+        implementation_.connect(destination, port, ec);
         assert(!ec);
     }
 
     void socket::open(ip ip_version, std::error_code& ec) noexcept {
-        implementation = internal_::socket(ip_version, transport::udp, ec);
+        implementation_ = internal_::socket(ip_version, transport::udp, ec);
     }
 
 #ifdef __cpp_exceptions
@@ -65,6 +65,14 @@ namespace libwire::udp {
 #endif
 
     void socket::close() noexcept {
-        implementation = internal_::socket();
+        implementation_ = internal_::socket();
+    }
+
+    const internal_::socket& socket::implementation() const {
+        return implementation_;
+    }
+
+    internal_::socket& socket::implementation() {
+        return implementation_;
     }
 } // namespace libwire::udp

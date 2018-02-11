@@ -67,6 +67,10 @@ namespace libwire::udp {
 
         internal_::socket::native_handle_t native_handle() const;
 
+        internal_::socket& implementation();
+
+        const internal_::socket& implementation() const;
+
         /**
          * Get option value for socket.
          *
@@ -96,7 +100,7 @@ namespace libwire::udp {
          * Same as overload with error code argument but will throw
          * std::system_error.
          */
-        void listen(address source, uint16_t port);
+        void bind(address source, uint16_t port);
 
         /**
          * Associate remote endpoint with UDP socket.
@@ -191,7 +195,7 @@ namespace libwire::udp {
         void write(const Buffer& input, std::optional<std::tuple<address, uint16_t>> destination = {});
 #endif
     private:
-        internal_::socket implementation;
+        internal_::socket implementation_;
     };
 
     template<typename Option>
@@ -210,7 +214,7 @@ namespace libwire::udp {
                       "socket::read can't be used with container with non-byte elements");
 
         output.resize(max_size);
-        auto [address, port, size] = implementation.receive_from(output.data(), max_size, ec);
+        auto [address, port, size] = implementation_.receive_from(output.data(), max_size, ec);
         output.resize(size);
         return {address, port};
     }
@@ -245,7 +249,7 @@ namespace libwire::udp {
         static_assert(sizeof(typename Buffer::value_type) == sizeof(uint8_t),
                       "socket::write can't be used with container with non-byte elements");
 
-        implementation.send_to(input.data(), input.size(), ec, destination);
+        implementation_.send_to(input.data(), input.size(), ec, destination);
     }
 
 #ifdef __cpp_exceptions

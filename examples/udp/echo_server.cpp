@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     uint16_t port = std::stoi(argv[1]);
 
     udp::socket socket(ip::v4);
-    socket.listen(ipv4::any, port);
+    socket.bind(ipv4::any, port);
 
     std::cout << "Listening on " << port << " port.\n";
 

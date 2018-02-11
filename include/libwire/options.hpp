@@ -32,12 +32,12 @@ namespace libwire {
     struct non_blocking_t {
         template<typename Socket>
         static bool get(const Socket& sock) noexcept {
-            return get_impl(sock.native_handle());
+            return get_impl(sock);
         }
 
         template<typename Socket>
         static void set(Socket& sock, bool value) noexcept {
-            set_impl(sock.native_handle(), value);
+            set_impl(sock, value);
         }
 
     private:
@@ -63,12 +63,12 @@ namespace libwire {
         static void set(Socket& socket, Duration d) noexcept {
             namespace ch = std::chrono;
 
-            set_impl(socket.native_handle(), ch::duration_cast<ch::milliseconds>(d));
+            set_impl(socket.implementation(), ch::duration_cast<ch::milliseconds>(d));
         }
 
         template<typename Socket>
         static std::chrono::milliseconds get(const Socket& socket) noexcept {
-            return get_impl(socket.native_handle());
+            return get_impl(socket.implementation());
         }
 
     private:
@@ -91,12 +91,12 @@ namespace libwire {
         static void set(Socket& socket, Duration d) noexcept {
             namespace ch = std::chrono;
 
-            set_impl(socket.native_handle(), ch::duration_cast<ch::milliseconds>(d));
+            set_impl(socket.implementation(), ch::duration_cast<ch::milliseconds>(d));
         }
 
         template<typename Socket>
         static std::chrono::milliseconds get(const Socket& socket) noexcept {
-            return get_impl(socket.native_handle());
+            return get_impl(socket.implementation());
         }
 
     private:
@@ -117,12 +117,12 @@ namespace libwire {
     struct send_buffer_size_t {
         template<typename Socket>
         static void set(Socket& socket, size_t size) noexcept {
-            set_impl(socket.native_handle(), size);
+            set_impl(socket.implementation(), size);
         }
 
         template<typename Socket>
         static size_t get(const Socket& socket) noexcept {
-            return get_impl(socket.native_handle());
+            return get_impl(socket.implementation());
         }
 
     private:
@@ -135,12 +135,12 @@ namespace libwire {
     struct receive_buffer_size_t {
         template<typename Socket>
         static void set(Socket& socket, size_t size) noexcept {
-            set_impl(socket.native_handle(), size);
+            set_impl(socket.implementation(), size);
         }
 
         template<typename Socket>
         static size_t get(const Socket& socket) noexcept {
-            return get_impl(socket.native_handle());
+            return get_impl(socket.implementation());
         }
 
     private:
