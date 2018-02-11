@@ -174,10 +174,8 @@ namespace libwire::internal_ {
 
         sockaddr_storage sock_address{};
         socklen_t length = sizeof(sock_address);
-        [[maybe_unused]] int status = getsockname(handle, reinterpret_cast<sockaddr*>(&sock_address), &length);
-#ifndef NDEBUG
+        int status = getsockname(handle, reinterpret_cast<sockaddr*>(&sock_address), &length);
         if (status < 0) return {{0, 0, 0, 0}, 0u};
-#endif
         return sockaddr_to_endpoint(sock_address);
     }
 
@@ -186,10 +184,8 @@ namespace libwire::internal_ {
 
         sockaddr_storage sock_address{};
         socklen_t length = sizeof(sock_address);
-        [[maybe_unused]] int status = getpeername(handle, reinterpret_cast<sockaddr*>(&sock_address), &length);
-#ifndef NDEBUG
+        int status = getpeername(handle, reinterpret_cast<sockaddr*>(&sock_address), &length);
         if (status < 0) return {{0, 0, 0, 0}, 0u};
-#endif
         return sockaddr_to_endpoint(sock_address);
     }
 

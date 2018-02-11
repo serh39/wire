@@ -78,4 +78,12 @@ namespace libwire::udp {
     internal_::socket& socket::implementation() {
         return implementation_;
     }
+
+    std::tuple<address, uint16_t> socket::local_endpoint() noexcept {
+        return implementation_.local_endpoint();
+    }
+
+    std::tuple<address, uint16_t> socket::remote_endpoint() noexcept {
+        return implementation_.remote_endpoint();
+    }
 } // namespace libwire::udp

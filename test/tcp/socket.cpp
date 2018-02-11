@@ -70,6 +70,12 @@ TEST_P(TcpSocketPair, Connect) {
     ASSERT_TRUE(client.is_open());
 }
 
+TEST(TcpSocket, QueryEndpointWithoutConnection) {
+    tcp::socket sock1;
+    ASSERT_EQ(sock1.local_endpoint(), std::tuple(address{0, 0, 0, 0}, 0u));
+    ASSERT_EQ(sock1.remote_endpoint(), std::tuple(address{0, 0, 0,0}, 0u));
+}
+
 TEST_P(TcpSocketPair, EndpointsConsistency) {
     ASSERT_EQ(client.remote_endpoint(), std::tuple(GetParam(), 7777));
     ASSERT_EQ(std::get<0>(client.local_endpoint()), GetParam());

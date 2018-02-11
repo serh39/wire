@@ -217,6 +217,8 @@ namespace libwire::tcp {
          * port is randomly picked from implementation-defined range of
          * [ephemeral ports](https://en.wikipedia.org/wiki/Ephemeral_port)
          * (usually 49152-65535).
+         *
+         * If socket is not connected - {{0, 0, 0, 0}, 0} will be returned.
          */
         std::tuple<address, uint16_t> local_endpoint() const noexcept;
 
@@ -224,6 +226,8 @@ namespace libwire::tcp {
          * Get address and port of remote end of connection.
          *
          * Usually same as address/port passed in \ref connect.
+         *
+         * If socket is not connected - {{0, 0, 0, 0}, 0} will be returned.
          */
         std::tuple<address, uint16_t> remote_endpoint() const noexcept;
 

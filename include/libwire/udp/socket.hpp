@@ -103,6 +103,23 @@ namespace libwire::udp {
         void bind(address source, uint16_t port);
 
         /**
+         * Get endpoint previously passed to bind() or implicitly
+         * assigned to socket after write.
+         *
+         * If socket have no bound local endpoint this function
+         * will return {{0, 0, 0, 0}, 0}}.
+         */
+        std::tuple<address, uint16_t> local_endpoint() noexcept;
+
+        /**
+         * Get endpoint previously passed to associate().
+         *
+         * If socket have no bound remote endpoint this function
+         * will return {{0, 0, 0, 0}, 0}}.
+         */
+        std::tuple<address, uint16_t> remote_endpoint() noexcept;
+
+        /**
          * Associate remote endpoint with UDP socket.
          *
          * This allows you to omit destination argument from \ref write call

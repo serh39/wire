@@ -53,10 +53,12 @@ namespace libwire::tcp {
     }
 
     std::tuple<address, uint16_t> socket::local_endpoint() const noexcept {
+        if (!implementation_) return {{0, 0, 0, 0}, 0};
         return implementation_.local_endpoint();
     }
 
     std::tuple<address, uint16_t> socket::remote_endpoint() const noexcept {
+        if (!implementation_) return {{0, 0, 0, 0}, 0};
         return implementation_.remote_endpoint();
     }
 

@@ -39,6 +39,12 @@ TEST(UdpSocket, SimpleTransmission) {
     ASSERT_EQ(out_buffer, in_buffer);
 }
 
+TEST(UdpSocket, QueryEndpointWithoutConnection) {
+    tcp::socket sock1;
+    ASSERT_EQ(sock1.local_endpoint(), std::tuple(address{0, 0, 0, 0}, 0u));
+    ASSERT_EQ(sock1.remote_endpoint(), std::tuple(address{0, 0, 0,0}, 0u));
+}
+
 TEST(UdpSocket, DoubleBindShouldFail) {
     udp::socket sock(ip::v4);
 
