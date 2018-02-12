@@ -60,7 +60,7 @@ namespace libwire {
         return version == o.version && parts != o.parts;
     }
 
-    address::address(const memory_view& mv) noexcept : parts{} {
+    address::address(const memory_view<uint8_t>& mv) noexcept : parts{} {
         assert(mv.size() == 4 || mv.size() == 16);
 
         version = mv.size() == 4 ? ip::v4 : ip::v6;

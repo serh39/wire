@@ -60,9 +60,9 @@ namespace libwire::dns {
             if (entry->ai_protocol != IPPROTO_TCP) continue;
 
             if (entry->ai_family == AF_INET && protocol == ip::v4) {
-                result.emplace_back(memory_view(&(reinterpret_cast<sockaddr_in*>(entry->ai_addr))->sin_addr, 4));
+                result.emplace_back(memory_view((uint8_t*)&((sockaddr_in*)(entry->ai_addr))->sin_addr, 4));
             } else if (entry->ai_family == AF_INET6 && protocol == ip::v6) {
-                result.emplace_back(memory_view(&(reinterpret_cast<sockaddr_in6*>(entry->ai_addr))->sin6_addr, 16));
+                result.emplace_back(memory_view((uint8_t*)&((sockaddr_in6*)(entry->ai_addr))->sin6_addr, 16));
             }
         }
 

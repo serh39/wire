@@ -36,12 +36,12 @@
 std::tuple<libwire::address, uint16_t> libwire::internal_::sockaddr_to_endpoint(sockaddr_storage in) {
     if (in.ss_family == AF_INET) {
         auto& sock_address_v4 = reinterpret_cast<sockaddr_in&>(in);
-        return {memory_view(&sock_address_v4.sin_addr, sizeof(sock_address_v4.sin_addr)),
+        return {memory_view((uint8_t*)&sock_address_v4.sin_addr, sizeof(sock_address_v4.sin_addr)),
                 network_to_host(sock_address_v4.sin_port)};
     }
     if (in.ss_family == AF_INET6) {
         auto& sock_address_v6 = reinterpret_cast<sockaddr_in6&>(in);
-        return {memory_view(&sock_address_v6.sin6_addr, sizeof(sock_address_v6.sin6_addr)),
+        return {memory_view((uint8_t*)&sock_address_v6.sin6_addr, sizeof(sock_address_v6.sin6_addr)),
                 network_to_host(sock_address_v6.sin6_port)};
     }
     assert(false);

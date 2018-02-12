@@ -24,7 +24,7 @@
 #include <libwire/memory_view.hpp>
 
 TEST(MemoryView, NullState) {
-    libwire::memory_view view;
+    libwire::memory_view<uint8_t> view;
     ASSERT_EQ(view.capacity(), 0);
     ASSERT_EQ(view.size(), 0);
     ASSERT_EQ(view.max_size(), 0);

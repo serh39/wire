@@ -56,22 +56,23 @@ namespace libwire {
      * Implemented to allow to use raw memory in read/write operations without additional
      * overload sets.
      */
+    template<typename T>
     class memory_view {
     public:
-        using value_type = uint8_t;
+        using value_type = T;
         using size_type = size_t;
         using difference_type = std::ptrdiff_t;
         using reference = value_type&;
         using const_reference = const value_type&;
         using pointer = value_type*;
-        using const_pointer = const pointer;
+        using const_pointer = const value_type*;
         using iterator = pointer;
         using const_iterator = const_pointer;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<iterator>;
 
-        memory_view() noexcept;
-        memory_view(void* memory, size_t size_bytes) noexcept;
+        memory_view() noexcept = default;
+        memory_view(T* memory, size_t size_bytes) noexcept;
 
 #ifdef __cpp_exceptions
         const_reference at(size_t) const;
@@ -149,8 +150,159 @@ namespace libwire {
         void swap(memory_view& other) noexcept;
 
     private:
-        uint8_t* data_;
-        size_t size_;
-        size_t capacity_;
+        T* data_ = nullptr;
+        size_t size_ = 0;
+        size_t capacity_ = 0;
     };
+
+    template<typename T>
+    memory_view<T>::memory_view(T* memory, size_t size_bytes) noexcept
+        : data_(memory), size_(size_bytes), capacity_(size_bytes) {
+    }
+
+#ifdef __cpp_exceptions
+    template<typename T>
+    const T& memory_view<T>::at(size_t i) const {
+        if (i > size()) {
+            throw std::out_of_range("Index is bigger than size");
+        }
+        return *(data_ + i);
+    }
+#endif // ifdef __cpp_exceptions
+
+    template<typename T>
+    const T& memory_view<T>::operator[](size_t i) const noexcept {
+        return *(data_ + i);
+    }
+
+#ifdef __cpp_exceptions
+    template<typename T>
+    T& memory_view<T>::at(size_t i) {
+        if (i > size()) {
+            throw std::out_of_range("Index is bigger than size");
+        }
+        return *(data_ + i);
+    }
+#endif // ifdef __cpp_exceptions
+
+    template<typename T>
+    T& memory_view<T>::operator[](size_t i) noexcept {
+        return *(data_ + i);
+    }
+
+    template<typename T>
+    const T& memory_view<T>::front() const noexcept {
+        return *data_;
+    }
+
+    template<typename T>
+    const T& memory_view<T>::back() const noexcept {
+        return *(data_ + size() - 1);
+    }
+
+    template<typename T>
+    T& memory_view<T>::front() noexcept {
+        return *data_;
+    }
+
+    template<typename T>
+    T& memory_view<T>::back() noexcept {
+        return *(data_ + size() - 1);
+    }
+
+    template<typename T>
+    const T* memory_view<T>::data() const noexcept {
+        return data_;
+    }
+
+    template<typename T>
+    T* memory_view<T>::data() noexcept {
+        return data_;
+    }
+
+    template<typename T>
+    const T* memory_view<T>::begin() const noexcept {
+        return data_;
+    }
+
+    template<typename T>
+    const T* memory_view<T>::end() const noexcept {
+        return data_ + size();
+    }
+
+    template<typename T>
+    T* memory_view<T>::begin() noexcept {
+        return data_;
+    }
+
+    template<typename T>
+    T* memory_view<T>::end() noexcept {
+        return data_ + size();
+    }
+
+    template<typename T>
+    const T* memory_view<T>::cbegin() const noexcept {
+        return data_;
+    }
+
+    template<typename T>
+    const T* memory_view<T>::cend() const noexcept {
+        return data_ + size();
+    }
+
+    template<typename T>
+    size_t memory_view<T>::size() const noexcept {
+        return size_;
+    }
+
+    template<typename T>
+    size_t memory_view<T>::max_size() const noexcept {
+        return capacity_;
+    }
+
+    template<typename T>
+    size_t memory_view<T>::capacity() const noexcept {
+        return capacity_;
+    }
+
+    template<typename T>
+    void memory_view<T>::shrink_back(size_t bytes_count) noexcept {
+        size_ -= bytes_count;
+    }
+
+    template<typename T>
+    void memory_view<T>::shrink_front(size_t bytes_count) noexcept {
+        capacity_ -= bytes_count;
+        size_ -= bytes_count;
+        data_ += bytes_count;
+    }
+
+    template<typename T>
+    void memory_view<T>::clear() noexcept {
+        size_ = 0;
+    }
+
+    template<typename T>
+    void memory_view<T>::resize(size_t new_size) noexcept(!LIBWIRE_EXCEPTIONS_ENABLED_BOOL) {
+        if (new_size > capacity_) {
+#ifdef __cpp_exceptions
+            throw std::out_of_range("Too big new_size");
+#else
+            return;
+#endif
+        }
+        size_ = new_size;
+    }
+
+    template<typename T>
+    void memory_view<T>::swap(memory_view<T>& other) noexcept {
+        using std::swap;
+
+        std::swap(this->data_, other.data_);
+        std::swap(this->size_, other.size_);
+        std::swap(this->capacity_, other.capacity_);
+    }
+
+    extern template class memory_view<uint8_t>;
+    extern template class memory_view<int8_t>;
 } // namespace libwire

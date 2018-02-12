@@ -65,7 +65,7 @@ namespace libwire {
          * Construct IP address from raw bytes in network byte order (big endian).
          * Size of view must be either 4 or 16 bytes.
          */
-        address(const memory_view&) noexcept;
+        address(const memory_view<uint8_t>&) noexcept;
 
         /**
          * Construct IPv4 address from 4 bytes in network byte order (big endian).
