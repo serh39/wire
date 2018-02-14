@@ -139,30 +139,45 @@ namespace libwire::internal_ {
     }
 
 #ifdef MSG_NOSIGNAL
-#    define IO_FLAGS MSG_NOSIGNAL
+#    define NO_SIGPIPE MSG_NOSIGNAL
 #else
-#    define IO_FLAGS 0
+#    define NO_SIGPIPE 0
 #endif
 
     size_t socket::write(const void* input, size_t length_bytes, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
 
         ssize_t actually_written =
-            error_wrapper(ec, ::send, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS);
+            error_wrapper(ec, ::send, handle, reinterpret_cast<const char*>(input), length_bytes, NO_SIGPIPE);
         return size_t(actually_written);
     }
 
     size_t socket::read(void* output, size_t length_bytes, std::error_code& ec) noexcept {
         assert(handle != not_initialized);
-
-        ssize_t actually_readen =
-            error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, IO_FLAGS);
-        if (actually_readen == 0 && length_bytes != 0) {
-            // We wanted more than zero bytes but got zero, looks like EOF.
-            ec = std::error_code(EOF, error::system_category());
+        if (length_bytes == 0) {
             return 0;
         }
-        return size_t(actually_readen);
+
+        ssize_t actually_read =
+            error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, NO_SIGPIPE | MSG_WAITALL);
+
+        // Treat short read as a EOF because we use MSG_WAITALL.
+        // In this case read() can read less bytes than requested only if we
+        // hit end-of-stream.
+        if (!state.internal_non_blocking && actually_read < ssize_t(length_bytes) && actually_read != -1) {
+            ec = std::error_code(EOF, error::system_category());
+        }
+
+        // Short read in non-blocking mode is fine, EOF is hit only if we got 0 bytes.
+        if (state.internal_non_blocking && actually_read == 0) {
+            ec = std::error_code(EOF, error::system_category());
+        }
+
+        if (actually_read == -1) {
+            return 0;
+        }
+
+        return size_t(actually_read);
     }
 
     socket::operator bool() const noexcept {
@@ -197,11 +212,11 @@ namespace libwire::internal_ {
         if (destination) {
             sockaddr_storage addr = endpoint_to_sockaddr(*destination);
             actually_written =
-                error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, IO_FLAGS,
+                error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes, NO_SIGPIPE,
                               reinterpret_cast<sockaddr*>(&addr), uint32_t(sizeof(sockaddr_in6)));
         } else {
             actually_written = error_wrapper(ec, sendto, handle, reinterpret_cast<const char*>(input), length_bytes,
-                                             IO_FLAGS, nullptr, 0u);
+                                             NO_SIGPIPE, nullptr, 0u);
         }
         return actually_written < 0 ? 0 : size_t(actually_written);
     }
@@ -214,7 +229,7 @@ namespace libwire::internal_ {
         socklen_t socklen = sizeof(sock_address);
 
         ssize_t received_bytes = error_wrapper(ec, ::recvfrom, handle, reinterpret_cast<char*>(output), length_bytes,
-                                               IO_FLAGS, reinterpret_cast<sockaddr*>(&sock_address), &socklen);
+                                               NO_SIGPIPE, reinterpret_cast<sockaddr*>(&sock_address), &socklen);
 
         std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sock_address);
         return {std::get<0>(endpoint), std::get<1>(endpoint), received_bytes};

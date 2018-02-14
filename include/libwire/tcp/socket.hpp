@@ -283,8 +283,15 @@ namespace libwire::tcp {
          * reference. Buffer will be resized to actual count of bytes
          * received.
          *
-         * Error code will be set to error code if anything went wrong, buffer
-         * will be resized to 0 elements.
+         * Blocking read can return less bytes than requested only if EOF hit.
+         * For non-blocking socket bytes_count specifies maximum amount of bytes
+         * to read. It's very likely that read will return less bytes.
+         *
+         * Error code will be set if anything went wrong and buffer will be resized
+         * to 0 elements.
+         *
+         * read of 0 bytes will always complete successfully even if socket
+         * is in errored state.
          *
          * **Buffer type requirements:**
          *
@@ -396,14 +403,8 @@ namespace libwire::tcp {
                       "socket::read can't be used with container with non-byte elements");
 
         output.resize(bytes_count);
-        size_t total_received = 0;
-        // Read exactly bytes_count bytes, retrying when needed.
-        while (total_received < bytes_count) {
-            size_t bytes_received =
-                implementation_.read(output.data() + total_received, bytes_count - total_received, ec);
-            if (ec) break;
-            total_received += bytes_received;
-        }
+        size_t bytes_received = implementation_.read(output.data(), bytes_count, ec);
+        output.resize(bytes_received);
         open = (ec != error::generic::disconnected);
 
         return output;
