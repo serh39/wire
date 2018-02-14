@@ -32,12 +32,12 @@ namespace libwire {
     struct non_blocking_t {
         template<typename Socket>
         static bool get(const Socket& sock) noexcept {
-            return get_impl(sock);
+            return get_impl(sock.implementation());
         }
 
         template<typename Socket>
         static void set(Socket& sock, bool value) noexcept {
-            set_impl(sock, value);
+            set_impl(sock.implementation(), value);
         }
 
     private:

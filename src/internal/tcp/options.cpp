@@ -45,10 +45,14 @@ using namespace std::literals::chrono_literals;
 namespace libwire::tcp {
     inline namespace options {
         void keep_alive_t::set(socket& sock, bool enabled) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
             setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, (const char*)&enabled, sizeof(bool));
         }
 
         bool keep_alive_t::get(const socket& sock) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
             int result;
             socklen_t result_size = sizeof(result);
             getsockopt(sock.native_handle(), SOL_SOCKET, SO_KEEPALIVE, (char*)&result, &result_size);
@@ -57,6 +61,8 @@ namespace libwire::tcp {
         }
 
         void linger_t::set_impl(socket& sock, bool enabled, std::chrono::seconds timeout) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
             struct linger linger_opt {};
             linger_opt.l_onoff = int(enabled);
             linger_opt.l_linger = int(timeout.count());
@@ -64,6 +70,8 @@ namespace libwire::tcp {
         }
 
         std::tuple<bool, std::chrono::seconds> linger_t::get(const socket& sock) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
             struct linger linger_opt {};
             socklen_t opt_size = sizeof(linger_opt);
             getsockopt(sock.native_handle(), SOL_SOCKET, SO_LINGER, (char*)&linger_opt, &opt_size);
@@ -73,6 +81,8 @@ namespace libwire::tcp {
 
         void retransmission_timeout_t::set_impl([[maybe_unused]] socket& sock,
                                                 [[maybe_unused]] std::chrono::milliseconds timeout) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
 #ifdef TCP_USER_TIMEOUT
             auto timeout_count = unsigned(timeout.count());
             setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_USER_TIMEOUT, &timeout_count, sizeof(timeout_count));
@@ -81,6 +91,8 @@ namespace libwire::tcp {
         }
 
         std::chrono::milliseconds retransmission_timeout_t::get([[maybe_unused]] const socket& sock) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
 #ifdef TCP_USER_TIMEOUT
             unsigned result;
             socklen_t result_size = sizeof(result);
@@ -93,10 +105,14 @@ namespace libwire::tcp {
         }
 
         void no_delay_t::set(socket& sock, bool enabled) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
             setsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, (const char*)&enabled, sizeof(bool));
         }
 
         bool no_delay_t::get(const socket& sock) noexcept {
+            assert(sock.native_handle() != internal_::socket::not_initialized);
+
             int result;
             socklen_t result_size = sizeof(result);
             getsockopt(sock.native_handle(), IPPROTO_TCP, TCP_NODELAY, (char*)&result, &result_size);

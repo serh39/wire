@@ -123,17 +123,21 @@ namespace libwire::tcp {
          * socket.set_option(tcp::user_timeout, 500ms);
          * \endcode
          *
+         * \warning You can't set options before you connect().
+         * Values specified before will be just ignored (or will terminate program
+         * if libwire built without NDEBUG defined).
+         *
          * Even more, if some platform-specific option is not provided
          * by generic libwire interface you can add it easily because option
          * is just a class with two static functions.
          *
          * \code
          * struct example_option_t {
-         *      bool get(const tcp::socket& sock) const noexcept {
+         *      static bool get(const tcp::socket& sock) const noexcept {
          *          return true;
          *      }
          *
-         *      void set(tcp::socket& sock, bool value) const noexcept {
+         *      static void set(tcp::socket& sock, bool value) const noexcept {
          *          // You can just not declare this function if option
          *          // can't be set.
          *

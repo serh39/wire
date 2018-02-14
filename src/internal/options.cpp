@@ -37,6 +37,8 @@ namespace libwire {
     }
 
     void non_blocking_t::set_impl(internal_::socket& socket, bool enable) noexcept {
+        assert(socket);
+
 #ifdef _WIN32
         unsigned long mode = unsigned(enable);
         int status = ioctlsocket(socket.handle, FIONBIO, &mode);
@@ -56,6 +58,8 @@ namespace libwire {
     }
 
     std::chrono::milliseconds receive_timeout_t::get_impl(const internal_::socket& socket) noexcept {
+        assert(socket);
+
         timeval timeval{};
         socklen_t size = sizeof(timeval);
         getsockopt(socket.handle, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeval, &size);
@@ -64,6 +68,8 @@ namespace libwire {
     }
 
     std::chrono::milliseconds send_timeout_t::get_impl(const internal_::socket& socket) noexcept {
+        assert(socket);
+
         timeval timeval{};
         socklen_t size = sizeof(timeval);
         getsockopt(socket.handle, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeval, &size);
@@ -72,18 +78,24 @@ namespace libwire {
     }
 
     void send_timeout_t::set_impl(internal_::socket& socket, std::chrono::milliseconds ms) noexcept {
+        assert(socket);
+
         timeval timeval{};
         timeval.tv_usec = ms.count() * 1000;
         setsockopt(socket.handle, SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeval, sizeof(timeval));
     }
 
     void receive_timeout_t::set_impl(internal_::socket& socket, std::chrono::milliseconds ms) noexcept {
+        assert(socket);
+
         timeval timeval{};
         timeval.tv_usec = ms.count() * 1000;
         setsockopt(socket.handle, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeval, sizeof(timeval));
     }
 
     size_t send_buffer_size_t::get_impl(const internal_::socket& socket) noexcept {
+        assert(socket);
+
         size_t result = 0;
         socklen_t result_size = sizeof(result);
         getsockopt(socket.handle, SOL_SOCKET, SO_RCVBUF, (char*)&result, &result_size);
@@ -92,6 +104,8 @@ namespace libwire {
     }
 
     size_t receive_buffer_size_t::get_impl(const internal_::socket& socket) noexcept {
+        assert(socket);
+
         size_t result = 0;
         socklen_t result_size = sizeof(result);
         getsockopt(socket.handle, SOL_SOCKET, SO_SNDBUF, (char*)&result, &result_size);
@@ -100,10 +114,14 @@ namespace libwire {
     }
 
     void receive_buffer_size_t::set_impl(internal_::socket& socket, size_t size) noexcept {
+        assert(socket);
+
         setsockopt(socket.handle, SOL_SOCKET, SO_RCVBUF, (const char*)&size, sizeof(size));
     }
 
     void send_buffer_size_t::set_impl(internal_::socket& socket, size_t size) noexcept {
+        assert(socket);
+
         setsockopt(socket.handle, SOL_SOCKET, SO_SNDBUF, (const char*)&size, sizeof(size));
     }
 } // namespace libwire
