@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <stdexcept>
 
 /**
  * Defines memory_view wrapper.
