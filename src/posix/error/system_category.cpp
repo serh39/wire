@@ -90,10 +90,11 @@ std::string libwire::internal_::system_category::message(int code) const noexcep
     case EADDRNOTAVAIL:      return "Address not available";
     case ECONNABORTED:       return "Connection aborted";
     case ECONNRESET:         return "Connection reset";
+    case EPIPE:              return "Broken pipe";
     case ESHUTDOWN:          return "Endpoint shutdown";
     case EHOSTDOWN:          return "Host is down";
     case EHOSTUNREACH:       return "Host is unreachable";
-    default:                 return "Unknown error";
+    default:                 return strerror(code);
     }
     // clang-format on
 }

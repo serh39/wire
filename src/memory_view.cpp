@@ -21,7 +21,6 @@
  */
 
 #include "libwire/memory_view.hpp"
-#include <stdexcept>
 
 template class libwire::memory_view<uint8_t>;
 template class libwire::memory_view<int8_t>;
