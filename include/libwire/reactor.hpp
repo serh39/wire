@@ -27,11 +27,15 @@
 namespace libwire {
     class reactor {
     public:
-
         /**
-         * Start watching socket for readiness.
+         * Start watching socket for read status.
          */
         void add_socket(internal_::socket&);
+
+        /**
+         * Stop watching socket for read status.
+         */
+        void remove_socket(internal_::socket&);
 
         /**
          * Add operation to socket's queue.
