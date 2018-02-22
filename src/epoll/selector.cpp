@@ -38,7 +38,7 @@ namespace libwire::internal_ {
         if (epoll_fd != -1) close(epoll_fd);
     }
 
-    void selector::register_socket(socket& socket, flags<event_code> interested_events) noexcept {
+    socket_data& selector::register_socket(socket& socket, flags<event_code> interested_events) noexcept {
         assert(epoll_fd != -1);
         assert(socket.handle != socket::not_initialized);
 
@@ -53,6 +53,8 @@ namespace libwire::internal_ {
         event.data.ptr = &(it->second);
         [[maybe_unused]] int status = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socket.handle, &event);
         assert(status == 0);
+
+        return it->second;
     }
 
     void selector::change_event_mask(socket::native_handle_t handle, flags<event_code> interested_events) noexcept {
@@ -69,7 +71,7 @@ namespace libwire::internal_ {
         assert(status == 0);
     }
 
-    void selector::deregister_socket(socket::native_handle_t handle) noexcept {
+    void selector::remove_socket(socket::native_handle_t handle) noexcept {
         assert(epoll_fd != -1);
         assert(handle != socket::not_initialized);
 

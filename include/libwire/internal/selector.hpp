@@ -89,9 +89,9 @@ namespace libwire::internal_ {
         selector& operator=(const selector&) = delete;
         selector& operator=(selector&&) = default;
 
-        void register_socket(socket& socket, flags<event_code> interested_events) noexcept;
+        socket_data& register_socket(socket& socket, flags<event_code> interested_events) noexcept;
         void change_event_mask(socket::native_handle_t handle, flags<event_code> interested_events) noexcept;
-        void deregister_socket(socket::native_handle_t handle) noexcept;
+        void remove_socket(socket::native_handle_t handle) noexcept;
 
         void poll(memory_view<event_t>& event_buffer, std::chrono::milliseconds timeout) noexcept;
 
