@@ -234,4 +234,25 @@ namespace libwire::internal_ {
         std::tuple<address, uint16_t> endpoint = sockaddr_to_endpoint(sock_address);
         return {std::get<0>(endpoint), std::get<1>(endpoint), received_bytes};
     }
+
+    size_t socket::nonblocking_read(void* output, size_t length_bytes, std::error_code& ec) noexcept {
+        assert(handle != not_initialized);
+
+        if (length_bytes == 0) {
+            return 0;
+        }
+
+        ssize_t actually_read =
+                    error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, NO_SIGPIPE | MSG_DONTWAIT);
+
+        if (actually_read == 0) {
+            ec = std::error_code(EOF, error::system_category());
+        }
+
+        if (actually_read == -1) {
+            return 0;
+        }
+
+        return size_t(actually_read);
+    }
 } // namespace libwire::internal_

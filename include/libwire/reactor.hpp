@@ -20,5 +20,40 @@
  * SOFTWARE.
  */
 
-
 #pragma once
+
+#include <libwire/internal/selector.hpp>
+
+namespace libwire {
+    class reactor {
+    public:
+
+        /**
+         * Start watching socket for readiness.
+         */
+        void add_socket(internal_::socket&);
+
+        /**
+         * Add operation to socket's queue.
+         */
+        void enqueue(internal_::socket&, internal_::operation);
+
+        /**
+         * Cancel oldest operation from socket's queue.
+         */
+        void cancel_oldest_operation(internal_::socket&);
+
+        /**
+         * Cancel all operations from socket's queue.
+         */
+        void cancel_all_operations(internal_::socket&);
+
+        /**
+         * Poll once and process pending operations.
+         */
+        void run_once();
+
+    private:
+        internal_::selector selector;
+    };
+} // namespace libwire

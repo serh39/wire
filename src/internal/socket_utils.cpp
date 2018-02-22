@@ -72,3 +72,11 @@ int libwire::internal_::last_socket_error() {
     return errno;
 #endif
 }
+
+int libwire::internal_::last_async_socket_error(libwire::internal_::socket::native_handle_t handle) {
+    int err = 0;
+    socklen_t errlength = sizeof(err);
+    getsockopt(handle, SOL_SOCKET, SO_ERROR, &err, &errlength);
+    assert(errlength == sizeof(err));
+    return err;
+}

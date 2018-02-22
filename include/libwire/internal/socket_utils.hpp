@@ -29,6 +29,7 @@
  * macros without prefix.
  */
 
+#include <cassert>
 #include <libwire/internal/socket.hpp>
 #include <libwire/internal/error/system_category.hpp>
 
@@ -52,7 +53,13 @@ namespace libwire::internal_ {
      */
     sockaddr_storage endpoint_to_sockaddr(std::tuple<address, uint16_t> in);
 
+    // TODO: Rename to last_sync_socket_error().
     int last_socket_error();
+
+    /**
+     * Get and clear last error happened on socket.
+     */
+    int last_async_socket_error(socket::native_handle_t handle);
 
     template<typename Call, typename... Args>
     auto error_wrapper(std::error_code& ec, Call call, Args&&... args) {
@@ -64,6 +71,8 @@ namespace libwire::internal_ {
 
             if (status < 0) {
                 last_error = last_socket_error();
+            } else {
+                last_error = 0;
                 break;
             }
         } while (last_error == EINTR);

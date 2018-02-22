@@ -44,7 +44,7 @@ namespace libwire::internal_ {
     using event_t = epoll_event;
 #endif
 
-    enum class operation_code {
+    enum class operation_type {
         read = 1<<1,
     };
 
@@ -52,16 +52,17 @@ namespace libwire::internal_ {
         // Values picked to match corresponding EPOLL* codes.
         readable = 1,
         // exceptional condition = 2
-        writeable = 4,
+        writable = 4,
         error = 8,
-        hangup = 16,
+        eof = 16,
 
     };
 
     struct operation {
-        operation_code opcode;
+        operation_type opcode;
         void* buffer;
         size_t buffer_size;
+        size_t already_read;
         std::function<void(size_t, std::error_code)> handler;
     };
 

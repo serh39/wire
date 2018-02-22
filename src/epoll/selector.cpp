@@ -47,10 +47,10 @@ namespace libwire::internal_ {
 
         epoll_event event;
         event.events = interested_events.get(event_code::readable)  * EPOLLIN  |
-                       interested_events.get(event_code::writeable) * EPOLLOUT |
+                       interested_events.get(event_code::writable)  * EPOLLOUT |
                        interested_events.get(event_code::error)     * EPOLLERR |
-                       interested_events.get(event_code::hangup)    * EPOLLHUP | EPOLLET;
-        event.data.ptr = &(*it);
+                       interested_events.get(event_code::eof)       * EPOLLHUP;
+        event.data.ptr = &(it->second);
         [[maybe_unused]] int status = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socket.handle, &event);
         assert(status == 0);
     }
@@ -61,9 +61,9 @@ namespace libwire::internal_ {
 
         epoll_event event;
         event.events = interested_events.get(event_code::readable)  * EPOLLIN  |
-                       interested_events.get(event_code::writeable) * EPOLLOUT |
+                       interested_events.get(event_code::writable)  * EPOLLOUT |
                        interested_events.get(event_code::error)     * EPOLLERR |
-                       interested_events.get(event_code::hangup)    * EPOLLHUP | EPOLLET;
+                       interested_events.get(event_code::eof)       * EPOLLHUP;
         event.data.ptr = &sockets.at(handle);
         [[maybe_unused]] int status = epoll_ctl(epoll_fd, EPOLL_CTL_MOD, handle, &event);
         assert(status == 0);
@@ -94,9 +94,9 @@ namespace libwire::internal_ {
     flags<event_code> selector::event_codes(const event_t& event) const noexcept {
         flags<event_code> result;
         if (event.events & EPOLLIN) result.set(event_code::readable);
-        if (event.events & EPOLLOUT) result.set(event_code::writeable);
+        if (event.events & EPOLLOUT) result.set(event_code::writable);
         if (event.events & EPOLLERR) result.set(event_code::error);
-        if (event.events & EPOLLHUP) result.set(event_code::hangup);
+        if (event.events & EPOLLHUP) result.set(event_code::eof);
         return result;
     }
 
