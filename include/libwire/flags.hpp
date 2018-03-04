@@ -39,7 +39,8 @@ namespace libwire {
     template<typename Flag, typename Storage = int>
     class flags {
     public:
-        static_assert((sizeof(Flag) <= sizeof(Storage)), "flags<> uses Storage type not enough to hold values of Flag.");
+        static_assert((sizeof(Flag) <= sizeof(Storage)),
+                      "flags<> uses Storage type not enough to hold values of Flag.");
 
         flags() = default;
 
@@ -48,12 +49,14 @@ namespace libwire {
          *
          * \warning No checks performed thus no type safety.
          */
-        explicit constexpr inline flags(Storage f) noexcept : set_(f) {}
+        explicit constexpr inline flags(Storage f) noexcept : set_(f) {
+        }
 
         /**
          * Construct Flags with a single flag set.
          */
-        constexpr flags(Flag flag) noexcept : set_(Storage(flag) | 0x00000000) {}
+        constexpr flags(Flag flag) noexcept : set_(Storage(flag) | 0x00000000) {
+        }
 
         constexpr flags(std::initializer_list<Flag> il) noexcept {
             for (Flag flag : il) {
@@ -138,18 +141,18 @@ namespace libwire {
             set_ ^= f.set_;
             return *this;
         }
+
     private:
         Storage set_ = 0x00000000;
     };
 
-#define LIBWIRE_DECLARE_FLAGS(flagtype, name) \
-        using name = Flags<flagtype>
+#define LIBWIRE_DECLARE_FLAGS(flagtype, name) using name = Flags<flagtype>
 
 #define LIBWIRE_DECLARE_FLAGS_OPERATORS(flagtype, storage) \
-        constexpr flags<flagtype> operator|(flagtype lhs, flagtype rhs) noexcept { \
-            return flags<flagtype>(storage(lhs) | storage(rhs)); \
-        } \
-        constexpr flags<flagtype> operator|(flagtype rhs, flags<flagtype, storage> lhs) noexcept { \
-            return flags<flagtype>(storage(rhs) | storage(lhs)); \
-        }
+    constexpr flags<flagtype> operator|(flagtype lhs, flagtype rhs) noexcept { \
+        return flags<flagtype>(storage(lhs) | storage(rhs)); \
+    } \
+    constexpr flags<flagtype> operator|(flagtype rhs, flags<flagtype, storage> lhs) noexcept { \
+        return flags<flagtype>(storage(rhs) | storage(lhs)); \
+    }
 } // namespace libwire
