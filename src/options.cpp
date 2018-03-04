@@ -47,9 +47,10 @@ namespace libwire {
             socket.state.internal_non_blocking = enable;
         }
 #else
-        int flags = fcntl(socket.handle, F_GETFL, 0);
-        flags = enable ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK);
-        int status = fcntl(socket.handle, F_SETFL, flags);
+        int flags = fcntl(socket.handle, F_GETFL, 0); // NOLINT(hicpp-vararg)
+        // (about NOLINT) We can't do anything about it because fcntl returns int.
+        flags = enable ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK); // NOLINT(hicpp-signed-bitwise)
+        int status = fcntl(socket.handle, F_SETFL, flags); // NOLINT(hicpp-vararg)
         if (status != -1) {
             socket.state.user_non_blocking = enable;
             socket.state.internal_non_blocking = enable;

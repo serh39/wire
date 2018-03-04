@@ -2,7 +2,7 @@
 
 namespace libwire::internal_ {
     uint16_t flip_endianess(uint16_t input) noexcept {
-        return (input >> 8u) | (input << 8u);
+        return uint16_t(input >> 8u) | uint16_t(input << 8u);
     }
     uint32_t flip_endianess(uint32_t input) noexcept {
         // clang-format off

@@ -36,7 +36,7 @@ namespace libwire {
      * \tparam Storage Type to use for OR-ed flags store. Following requirement
      *                 should be met: sizeof(Flag) <= sizeof(Storage).
      */
-    template<typename Flag, typename Storage = int>
+    template<typename Flag, typename Storage = uint32_t>
     class flags {
     public:
         static_assert((sizeof(Flag) <= sizeof(Storage)),
