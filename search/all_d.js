@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['open',['open',['../classlibwire_1_1udp_1_1socket.html#a08defa2bac9cd6129da62394a833801f',1,'libwire::udp::socket']]],
+  ['operation_5fnot_5fpermitted',['operation_not_permitted',['../namespacelibwire_1_1error.html#a67e895a0422455076608443966da641aa90ab0b8ee5bda1eff5769cfe3611152e',1,'libwire::error']]],
+  ['operator_20storage',['operator Storage',['../classlibwire_1_1flags.html#ad90b403c338da4ff838890f48876c83b',1,'libwire::flags']]],
+  ['operator_21',['operator!',['../classlibwire_1_1flags.html#a51514249810c12d2a832d3eecd183096',1,'libwire::flags']]],
+  ['operator_21_3d',['operator!=',['../structlibwire_1_1address.html#adc9ec375cf2fb8e1e68beaa652c70c71',1,'libwire::address']]],
+  ['operator_26',['operator&amp;',['../classlibwire_1_1flags.html#a337b9f8335bdd5db7e5b73d1405d07c7',1,'libwire::flags::operator&amp;(Flag flag) const noexcept'],['../classlibwire_1_1flags.html#a87447ec0b1b5a7d0572e0b55238929c2',1,'libwire::flags::operator&amp;(const flags &amp;f) const noexcept']]],
+  ['operator_26_3d',['operator&amp;=',['../classlibwire_1_1flags.html#a6d022242dbdf0371304133bc3e66ee0d',1,'libwire::flags::operator&amp;=(Flag flag) noexcept'],['../classlibwire_1_1flags.html#a5be74ea25781451b940cb6bbab76e76f',1,'libwire::flags::operator&amp;=(const flags &amp;f) noexcept']]],
+  ['operator_28_29',['operator()',['../structstd_1_1hash_3_01libwire_1_1address_01_4.html#a3ae71c616cd2734133cffb88450ae03e',1,'std::hash&lt; libwire::address &gt;']]],
+  ['operator_3d',['operator=',['../classlibwire_1_1tcp_1_1listener.html#a18061ee2f5baa03872bf3830489a2888',1,'libwire::tcp::listener::operator=(const listener &amp;)=delete'],['../classlibwire_1_1tcp_1_1listener.html#ae2fb88c492bdc7019733d0926c05f73f',1,'libwire::tcp::listener::operator=(listener &amp;&amp;) noexcept=default'],['../classlibwire_1_1tcp_1_1socket.html#a4af41e8b31b00b5d6e6e6cc2ff0b292b',1,'libwire::tcp::socket::operator=(const socket &amp;)=delete'],['../classlibwire_1_1tcp_1_1socket.html#aa4556ca3b6228498173673d0f7accb75',1,'libwire::tcp::socket::operator=(socket &amp;&amp;) noexcept=default'],['../classlibwire_1_1udp_1_1socket.html#adc21fb1c84acdcf5329bd2008aca1787',1,'libwire::udp::socket::operator=(const socket &amp;)=delete'],['../classlibwire_1_1udp_1_1socket.html#a46e4ba83d96b3eca219defd1a0615300',1,'libwire::udp::socket::operator=(socket &amp;&amp;)=default']]],
+  ['operator_3d_3d',['operator==',['../structlibwire_1_1address.html#a5b3321ad85b0a3a49f2f20a577715c6f',1,'libwire::address']]],
+  ['operator_5b_5d',['operator[]',['../classlibwire_1_1memory__view.html#a786e584fdc67201bac8abdbaad585911',1,'libwire::memory_view::operator[](size_t) const noexcept'],['../classlibwire_1_1memory__view.html#a5d86ecfcd2fc4a40b96884cd5aa952dd',1,'libwire::memory_view::operator[](size_t) noexcept']]],
+  ['operator_5e',['operator^',['../classlibwire_1_1flags.html#aa64810d08b6ab917e4e21018fec2a5a4',1,'libwire::flags::operator^(Flag flag) const noexcept'],['../classlibwire_1_1flags.html#ad08a2edf7674e7e38bd51e12d6c63007',1,'libwire::flags::operator^(const flags &amp;f) const noexcept']]],
+  ['operator_5e_3d',['operator^=',['../classlibwire_1_1flags.html#a03b781b06d5b6742d91960b98bc6b2e3',1,'libwire::flags::operator^=(Flag flag) noexcept'],['../classlibwire_1_1flags.html#a7e7d29cdaf591ddab06248e3e5e810f5',1,'libwire::flags::operator^=(const flags &amp;f) noexcept']]],
+  ['operator_7c',['operator|',['../classlibwire_1_1flags.html#a4b8893e36b2f0af0cd08498a70ee525c',1,'libwire::flags::operator|(Flag flag) const noexcept'],['../classlibwire_1_1flags.html#a4ee3fc11e5d05071141699f82902a0bb',1,'libwire::flags::operator|(const flags &amp;f) const noexcept']]],
+  ['operator_7c_3d',['operator|=',['../classlibwire_1_1flags.html#a14d6726d782c053fc1395cc00aeae6fd',1,'libwire::flags::operator|=(Flag flag) noexcept'],['../classlibwire_1_1flags.html#af4cc29050bfeb19d8eed7415e810ec21',1,'libwire::flags::operator|=(const flags &amp;f) noexcept']]],
+  ['operator_7e',['operator~',['../classlibwire_1_1flags.html#a906bc309f7bc5a8103f235866b330b5d',1,'libwire::flags']]],
+  ['option',['option',['../classlibwire_1_1tcp_1_1listener.html#aa738df8e77f01f72e795de574ebc1b08',1,'libwire::tcp::listener::option()'],['../classlibwire_1_1tcp_1_1socket.html#a98f18a8743e96d417dfa8758c5d82bff',1,'libwire::tcp::socket::option()'],['../classlibwire_1_1udp_1_1socket.html#a26455f21da8aeb09217ba88c7a4fc689',1,'libwire::udp::socket::option()']]],
+  ['options_2ehpp',['options.hpp',['../options_8hpp.html',1,'']]],
+  ['options_2ehpp',['options.hpp',['../tcp_2options_8hpp.html',1,'']]],
+  ['out_5fof_5fmemory',['out_of_memory',['../namespacelibwire_1_1error.html#a67e895a0422455076608443966da641aa2ff987e1f916168e67d9202204f0e453',1,'libwire::error']]]
+];
