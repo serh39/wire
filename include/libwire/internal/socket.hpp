@@ -134,6 +134,14 @@ namespace libwire::internal_ {
         size_t nonblocking_read(void* output, size_t length_bytes, std::error_code& ec) noexcept;
 
         /**
+         * Same as write but always non-blocking, even if socket is in blocking mode.
+         *
+         * \note Can be implemented by switching socket into non-blocking mode if platform
+         * doesn't supports per-operation non-blocking mode (Windows, for example).
+         */
+        size_t nonblocking_write(const void* input, size_t length_bytes, std::error_code& ec) noexcept;
+
+        /**
          * Send length_bytes from input to destination, set ec if any error
          * occurred.
          */

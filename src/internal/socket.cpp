@@ -255,4 +255,25 @@ namespace libwire::internal_ {
 
         return size_t(actually_read);
     }
+
+    size_t socket::nonblocking_write(const void* input, size_t length_bytes, std::error_code& ec) noexcept {
+        assert(handle != not_initialized);
+
+        if (length_bytes == 0) {
+            return 0;
+        }
+
+        ssize_t actually_written =
+            error_wrapper(ec, send, handle, reinterpret_cast<const char*>(input), length_bytes, NO_SIGPIPE | MSG_DONTWAIT);
+
+        if (actually_written == 0) {
+            ec = std::error_code(EOF, error::system_category());
+        }
+
+        if (actually_written == -1) {
+            return 0;
+        }
+
+        return size_t(actually_written);
+    }
 } // namespace libwire::internal_

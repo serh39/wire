@@ -59,5 +59,9 @@ namespace libwire {
 
     private:
         internal_::selector selector;
+
+        void process_reads(internal_::socket& socket, std::queue<internal_::operation>& operations);
+
+        void process_writes(internal_::socket& socket, std::queue<internal_::operation>& operations);
     };
 } // namespace libwire

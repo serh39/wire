@@ -54,6 +54,8 @@ namespace libwire::internal_ {
         [[maybe_unused]] int status = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, socket.handle, &event);
         assert(status == 0);
 
+        it->second.last_event_mask = interested_events;
+
         return it->second;
     }
 
@@ -61,14 +63,18 @@ namespace libwire::internal_ {
         assert(epoll_fd != -1);
         assert(handle != socket::not_initialized);
 
+        auto& socket_data = sockets.at(handle);
+        // TODO: Can we avoid this lookup (move reactor's optimization to this level)?
+
         epoll_event event;
         event.events = interested_events.get(event_code::readable)  * EPOLLIN  |
                        interested_events.get(event_code::writable)  * EPOLLOUT |
                        interested_events.get(event_code::error)     * EPOLLERR |
                        interested_events.get(event_code::eof)       * EPOLLHUP;
-        event.data.ptr = &sockets.at(handle);
+        event.data.ptr = &socket_data;
         [[maybe_unused]] int status = epoll_ctl(epoll_fd, EPOLL_CTL_MOD, handle, &event);
         assert(status == 0);
+        socket_data.last_event_mask = interested_events;
     }
 
     void selector::remove_socket(socket::native_handle_t handle) noexcept {

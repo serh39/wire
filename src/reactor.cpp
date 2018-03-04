@@ -77,16 +77,16 @@ namespace libwire {
      * (solved by last_reactor_ptr flag)
      */
     thread_local struct queue_ptr_cache {
-        std::queue<operation>* last_queue = nullptr;
+        internal_::socket_data* data = nullptr;
 
         socket::native_handle_t socket_handle = socket::not_initialized;
         reactor* reactor_ptr = nullptr;
     } operations_queue_cache;
 
     void reactor::add_socket(internal_::socket& sock) {
-        socket_data& data = selector.register_socket(sock, event_code::readable | event_code::error | event_code::eof);
+        socket_data& data = selector.register_socket(sock, event_code::readable);
 
-        operations_queue_cache.last_queue = &data.pending_operations;
+        operations_queue_cache.data = &data;
         operations_queue_cache.socket_handle = sock.handle;
         operations_queue_cache.reactor_ptr = this;
     }
@@ -95,7 +95,7 @@ namespace libwire {
         if (operations_queue_cache.socket_handle == sock.handle &&
             operations_queue_cache.reactor_ptr == this) {
 
-            operations_queue_cache.last_queue = nullptr;
+            operations_queue_cache.data = nullptr;
             operations_queue_cache.socket_handle = socket::not_initialized;
             operations_queue_cache.reactor_ptr = nullptr;
         }
@@ -106,19 +106,13 @@ namespace libwire {
     }
 
     void reactor::enqueue(internal_::socket& sock, internal_::operation operation) {
-        if (operations_queue_cache.socket_handle == sock.handle &&
-            operations_queue_cache.reactor_ptr == this) {
+        internal_::socket_data& socket_data =
+            operations_queue_cache.socket_handle == sock.handle &&
+            operations_queue_cache.reactor_ptr == this
+            ? *operations_queue_cache.data
+            : selector.user_data(sock.handle);
 
-            operations_queue_cache.last_queue->push(operation);
-        } else {
-            auto& queue = selector.user_data(sock.handle).pending_operations;
-
-            queue.push(operation);
-
-            operations_queue_cache.last_queue = &queue;
-            operations_queue_cache.socket_handle = sock.handle;
-            operations_queue_cache.reactor_ptr = this;
-        }
+        socket_data.pending_operations.push(operation);
     }
 
     void reactor::cancel_oldest_operation(internal_::socket& sock) {
@@ -129,6 +123,15 @@ namespace libwire {
     }
 
     void reactor::run_once() {
+        // Handle cases where there is no sockets or sockets without operations.
+        bool have_work = false;
+        for (auto& [_, data] : selector.sockets) {
+            if (!data.pending_operations.empty()) {
+                have_work = true;
+            }
+        }
+        if (!have_work) return;
+
         std::array<event_t, 16> events_buffer;
         memory_view<event_t> events(events_buffer.data(), events_buffer.size());
         selector.poll(events, 1h);
@@ -138,7 +141,9 @@ namespace libwire {
             auto& operations = selector.user_data(event).pending_operations;
             auto& socket = selector.user_data(event).socket;
 
-            operations_queue_cache.last_queue = &operations;
+            if (operations.empty()) continue;
+
+            operations_queue_cache.data = &selector.user_data(event);
             operations_queue_cache.socket_handle = socket.handle;
             operations_queue_cache.reactor_ptr = this;
 
@@ -153,38 +158,80 @@ namespace libwire {
                 return;
             }
 
-            if (operations.empty()) continue;
-
             if (codes.get(event_code::readable)) {
-                // TODO: Rewrite to use vectored I/O.
-                // (is it possible to implement it in efficient way or we should
-                // stick to "keep it simple" principe?)
-                do {
-                    auto& operation = operations.front();
-
-                    if (operation.opcode != operation_type::read) break;
-
-                    std::error_code ec;
-                    size_t wanted_to_read = operation.buffer_size - operation.already_read;
-                    size_t got_bytes = socket.nonblocking_read((char*) operation.buffer + operation.already_read,
-                                                               operation.buffer_size - operation.already_read, ec);
-                    operation.already_read += got_bytes;
-                    // Note direct comparision of error_code to EAGAIN.
-                    // Virtual calls to std::error_category::equivalent is
-                    // costly because this place is really hot.
-                    if (ec.value() == EAGAIN || ec.value() == EWOULDBLOCK || got_bytes < wanted_to_read) {
-                        // We got 0 bytes (Operation would block) or we got less than requested
-                        // (next operation obviously will block so there is no reason to try more).
-                        break;
-                    }
-                    if (operation.already_read == operation.buffer_size || ec) {
-                        operation.handler(operation.already_read, ec);
-                        operations.pop();
-                    }
-                } while (!operations.empty());
+                process_reads(socket, operations);
             } else if (codes.get(event_code::writable)) {
-                // TODO: We don't care for now.
+                process_writes(socket, operations);
+            }
+
+            if (!operations.empty()) {
+                if (operations.front().opcode == operation_type::write) {
+                    selector.change_event_mask(socket.handle, event_code::writable);
+                }
+                if (operations.front().opcode == operation_type::read) {
+                    selector.change_event_mask(socket.handle, event_code::readable);
+                }
             }
         }
+    }
+
+    void reactor::process_reads(internal_::socket& socket, std::queue<internal_::operation>& operations) {
+        // TODO: Rewrite to use vectored I/O.
+        // (is it possible to implement it in efficient way or we should
+        // stick to "keep it simple" principe?)
+        do {
+            auto& operation = operations.front();
+
+            if (operations.front().opcode != operation_type::read) {
+                break;
+            }
+
+            std::error_code ec;
+            size_t wanted_to_read = operation.buffer_size - operation.already_processed;
+            size_t got_bytes = socket.nonblocking_read((char*) operation.buffer + operation.already_processed,
+                                                       operation.buffer_size - operation.already_processed, ec);
+            operation.already_processed += got_bytes;
+            // Note direct comparision of error_code to EAGAIN.
+            // Virtual calls to std::error_category::equivalent is
+            // costly because this place is really hot.
+            if (ec.value() == EAGAIN || ec.value() == EWOULDBLOCK || got_bytes < wanted_to_read) {
+                // We got 0 bytes (Operation would block) or we got less than requested
+                // (next operation obviously will block so there is no reason to try more).
+                break;
+            }
+            if (operation.already_processed == operation.buffer_size || ec) {
+                operation.handler(operation.already_processed, ec);
+                operations.pop();
+            }
+        } while (!operations.empty());
+    }
+
+    void reactor::process_writes(internal_::socket& socket, std::queue<internal_::operation>& operations) {
+        do {
+            auto& operation = operations.front();
+
+            if (operations.front().opcode != operation_type::write) {
+                break;
+            }
+
+            std::error_code ec;
+            size_t wanted_to_write = operation.buffer_size - operation.already_processed;
+            size_t sent_bytes = socket.nonblocking_write((char*) operation.buffer + operation.already_processed,
+                                                       operation.buffer_size - operation.already_processed, ec);
+
+            operation.already_processed += sent_bytes;
+            // Note direct comparision of error_code to EAGAIN.
+            // Virtual calls to std::error_category::equivalent is
+            // costly because this place is really hot.
+            if (ec.value() == EAGAIN || ec.value() == EWOULDBLOCK || sent_bytes < wanted_to_write) {
+                // We got 0 bytes (Operation would block) or we got less than requested
+                // (next operation obviously will block so there is no reason to try more).
+                break;
+            }
+            if (operation.already_processed == operation.buffer_size || ec) {
+                operation.handler(operation.already_processed, ec);
+                operations.pop();
+            }
+        } while (!operations.empty());
     }
 } // namespace libwire

@@ -46,6 +46,7 @@ namespace libwire::internal_ {
 
     enum class operation_type {
         read = 1<<1,
+        write = 1<<2
     };
 
     enum class event_code {
@@ -62,7 +63,7 @@ namespace libwire::internal_ {
         operation_type opcode;
         void* buffer;
         size_t buffer_size;
-        size_t already_read;
+        size_t already_processed;
         std::function<void(size_t, std::error_code)> handler;
     };
 
@@ -75,6 +76,7 @@ namespace libwire::internal_ {
      */
     struct socket_data {
         socket& socket;
+        flags<event_code> last_event_mask;
         std::queue<operation> pending_operations;
     };
 
