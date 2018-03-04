@@ -120,6 +120,8 @@ install(FILES
 
 find_program(clangtidy_path NAMES clang-tidy)
 if(clangtidy_path)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
     add_custom_target(tidy
         COMMAND "${clangtidy_path}" -p "${PROJECT_BINARY_DIR}" ${LIBWIRE_ALL_SOURCES}
         COMMENT "Running clang-tidy tool"
@@ -130,6 +132,8 @@ endif()
 
 find_program(clangformat_path NAMES clang-format)
 if(clangformat_path)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
     add_custom_target(format
         COMMAND "${clangformat_path}" -i -style=file ${LIBWIRE_ALL_SOURCES} ${LIBWIRE_ALL_HEADERS}
         COMMENT "Running clang-format tool"
