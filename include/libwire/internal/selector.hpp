@@ -44,10 +44,7 @@ namespace libwire::internal_ {
     using event_t = epoll_event;
 #endif
 
-    enum class operation_type {
-        read = 1<<1,
-        write = 1<<2
-    };
+    enum class operation_type { read = 1 << 1, write = 1 << 2 };
 
     enum class event_code {
         // Values picked to match corresponding EPOLL* codes.
@@ -100,7 +97,6 @@ namespace libwire::internal_ {
         flags<event_code> event_codes(const event_t&) const noexcept;
         socket_data& user_data(const event_t&) const noexcept;
         socket_data& user_data(socket::native_handle_t handle) const noexcept;
-
 
 #ifdef __linux__
         int epoll_fd = -1;

@@ -243,7 +243,7 @@ namespace libwire::internal_ {
         }
 
         ssize_t actually_read =
-                    error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, NO_SIGPIPE | MSG_DONTWAIT);
+            error_wrapper(ec, recv, handle, reinterpret_cast<char*>(output), length_bytes, NO_SIGPIPE | MSG_DONTWAIT);
 
         if (actually_read == 0) {
             ec = std::error_code(EOF, error::system_category());
@@ -263,8 +263,8 @@ namespace libwire::internal_ {
             return 0;
         }
 
-        ssize_t actually_written =
-            error_wrapper(ec, send, handle, reinterpret_cast<const char*>(input), length_bytes, NO_SIGPIPE | MSG_DONTWAIT);
+        ssize_t actually_written = error_wrapper(ec, send, handle, reinterpret_cast<const char*>(input), length_bytes,
+                                                 NO_SIGPIPE | MSG_DONTWAIT);
 
         if (actually_written == 0) {
             ec = std::error_code(EOF, error::system_category());

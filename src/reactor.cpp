@@ -25,13 +25,13 @@
 #include "libwire/internal/socket_utils.hpp"
 
 #ifdef __linux__
-#   include <sys/epoll.h>
+#    include <sys/epoll.h>
 #endif
 
 #ifdef _WIN32
-#   include <ws2tcpip.h>
-#   define EAGAIN WSAEWOULDBLOCK
-#   define EWOULDBLOCK WSAEWOULDBLOCK
+#    include <ws2tcpip.h>
+#    define EAGAIN WSAEWOULDBLOCK
+#    define EWOULDBLOCK WSAEWOULDBLOCK
 #endif
 
 namespace libwire {
@@ -92,9 +92,7 @@ namespace libwire {
     }
 
     void reactor::remove_socket(internal_::socket& sock) {
-        if (operations_queue_cache.socket_handle == sock.handle &&
-            operations_queue_cache.reactor_ptr == this) {
-
+        if (operations_queue_cache.socket_handle == sock.handle && operations_queue_cache.reactor_ptr == this) {
             operations_queue_cache.data = nullptr;
             operations_queue_cache.socket_handle = socket::not_initialized;
             operations_queue_cache.reactor_ptr = nullptr;
@@ -107,19 +105,17 @@ namespace libwire {
 
     void reactor::enqueue(internal_::socket& sock, internal_::operation operation) {
         internal_::socket_data& socket_data =
-            operations_queue_cache.socket_handle == sock.handle &&
-            operations_queue_cache.reactor_ptr == this
-            ? *operations_queue_cache.data
-            : selector.user_data(sock.handle);
+            operations_queue_cache.socket_handle == sock.handle && operations_queue_cache.reactor_ptr == this
+                ? *operations_queue_cache.data
+                : selector.user_data(sock.handle);
 
-        socket_data.pending_operations.push(operation);
+        socket_data.pending_operations.emplace(std::move(operation));
     }
 
     void reactor::cancel_oldest_operation(internal_::socket& sock) {
     }
 
     void reactor::cancel_all_operations(internal_::socket& sock) {
-
     }
 
     void reactor::run_once() {
@@ -188,7 +184,7 @@ namespace libwire {
 
             std::error_code ec;
             size_t wanted_to_read = operation.buffer_size - operation.already_processed;
-            size_t got_bytes = socket.nonblocking_read((char*) operation.buffer + operation.already_processed,
+            size_t got_bytes = socket.nonblocking_read((char*)operation.buffer + operation.already_processed,
                                                        operation.buffer_size - operation.already_processed, ec);
             operation.already_processed += got_bytes;
             // Note direct comparision of error_code to EAGAIN.
@@ -216,8 +212,8 @@ namespace libwire {
 
             std::error_code ec;
             size_t wanted_to_write = operation.buffer_size - operation.already_processed;
-            size_t sent_bytes = socket.nonblocking_write((char*) operation.buffer + operation.already_processed,
-                                                       operation.buffer_size - operation.already_processed, ec);
+            size_t sent_bytes = socket.nonblocking_write((char*)operation.buffer + operation.already_processed,
+                                                         operation.buffer_size - operation.already_processed, ec);
 
             operation.already_processed += sent_bytes;
             // Note direct comparision of error_code to EAGAIN.
