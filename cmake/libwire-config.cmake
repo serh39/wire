@@ -18,7 +18,7 @@ if(NOT TARGET libwire AND NOT LIBWIRE_BINARY_DIR)
     include(${SELF_DIR}/libwire-targets.cmake)
 endif()
 
-get_property(LIGWIRE_INCLUDE_DIRS
+get_property(LIBWIRE_INCLUDE_DIRS
         TARGET libwire
         PROPERTY INTERFACE_INCLUDE_DIRECTORIES
         )
